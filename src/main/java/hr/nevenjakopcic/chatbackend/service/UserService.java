@@ -1,6 +1,7 @@
 package hr.nevenjakopcic.chatbackend.service;
 
 import hr.nevenjakopcic.chatbackend.dto.response.UserDto;
+import hr.nevenjakopcic.chatbackend.exception.NotFoundException;
 import hr.nevenjakopcic.chatbackend.mapper.UserDtoMapper;
 import hr.nevenjakopcic.chatbackend.model.User;
 import hr.nevenjakopcic.chatbackend.repository.UserRepository;
@@ -19,8 +20,16 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public List<UserDto> getAll() {
-        List<User> users = userRepository.getAll();
+        return userRepository.getAll().stream()
+                                      .map(UserDtoMapper::map)
+                                      .collect(Collectors.toList());
+    }
 
-        return users.stream().map(UserDtoMapper::map).collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public UserDto getByUsername(String username) {
+        User user = userRepository.getByUsername(username)
+                                  .orElseThrow(() -> new NotFoundException(String.format("User with username %s not found.", username)));
+
+        return UserDtoMapper.map(user);
     }
 }

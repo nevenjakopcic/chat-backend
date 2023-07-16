@@ -146,6 +146,7 @@ WHERE isRead = 0
 GO
 
 
+
 /* STORED PROCEDURES */
 
 CREATE PROCEDURE [social].[usp_GetAllUsers] AS
@@ -159,9 +160,49 @@ END
 GO
 
 /* INSERT DATA */
+INSERT [enum].[MemberRole] ([role])
+VALUES
+    ('ADMIN'),
+    ('MEMBER')
+GO
+
+INSERT [enum].[RelationshipStatus] ([status])
+VALUES
+    ('pending_first_second'),
+    ('pending_second_first'),
+    ('friends'),
+    ('block_first_second'),
+    ('block_second_first'),
+    ('block_both')
+GO
+
 INSERT [social].[User] ([username], [password], [lastOnline], [joinedAt]) 
 VALUES 
- (N'LuckyLuke', N'password', GETDATE(), GETDATE()),
- (N'JollyJumper', N'password', GETDATE(), GETDATE()),
- (N'Rantanplan', N'password', GETDATE(), GETDATE())
+    (N'LuckyLuke', N'password', GETDATE(), GETDATE()),
+    (N'JollyJumper', N'password', GETDATE(), GETDATE()),
+    (N'Rantanplan', N'password', GETDATE(), GETDATE())
+GO
+
+INSERT [social].[Group] ([name], [createdAt])
+VALUES
+    (N'Goodsprings', GETDATE()),
+    (N'Primm', GETDATE()),
+    (N'New Vegas', GETDATE())
+GO
+
+INSERT [social].[Member] ([groupId], [userId], [roleId], [joinedAt])
+VALUES
+    (1, 1, 1, GETDATE()),
+    (1, 2, 1, GETDATE()),
+    (1, 3, 2, GETDATE()),
+    (2, 3, 1, GETDATE())
+GO
+
+INSERT [io].[GroupMessage] ([authorId], [groupId], [content], [createdAt])
+VALUES
+    (1, 1, N'First message in Goodsprings', DATEADD(mi, -5, GETDATE())),
+    (2, 1, N'Second message in Goodsprings!', DATEADD(mi, -4, GETDATE())),
+    (3, 2, N'Third message ever, first in Primm!', DATEADD(mi, -3, GETDATE())),
+    (2, 1, N'Third message in Goodsprings', DATEADD(mi, -2, GETDATE())),
+    (3, 1, N'Fourth message in Goodsprings', DATEADD(mi, -1, GETDATE()))
 GO
