@@ -159,6 +159,14 @@ BEGIN
 END
 GO
 
+CREATE PROCEDURE [io].[usp_GetLastNGroupMessages] (@groupId AS INT, @n AS INT) AS
+BEGIN
+    SELECT TOP(@n) id, authorId, groupId, content, createdAt FROM GroupMessage WHERE groupId = @groupId;
+END
+GO
+
+
+
 /* INSERT DATA */
 INSERT [enum].[MemberRole] ([role])
 VALUES
