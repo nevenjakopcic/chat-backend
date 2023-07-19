@@ -1,3 +1,7 @@
+/* main.sql */
+USE chatdb
+
+
 /* SCHEMAS */
 
 IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = 'enum')
@@ -127,13 +131,11 @@ CREATE TABLE [io].[GroupMessageAttachment](
 GO
 
 
-
 /* CONSTRAINTS */
 
 ALTER TABLE [social].[User]  WITH CHECK 
 	ADD CONSTRAINT [CK_User_username_length] CHECK ((len([username])>(2) AND len([username])<(21)))
 GO
-
 
 
 /* INDEXES */
@@ -146,8 +148,12 @@ WHERE isRead = 0
 GO
 
 
+/* ENCRYPTION */
+
 
 /* STORED PROCEDURES */
+
+-- USER
 
 CREATE PROCEDURE [social].[usp_GetAllUsers] AS
 	SELECT id, username, lastOnline, joinedAt FROM [social].[User];
@@ -159,6 +165,8 @@ BEGIN
 END
 GO
 
+-- GROUP MESSAGES
+
 CREATE PROCEDURE [io].[usp_GetLastNGroupMessages] (@groupId AS INT, @n AS INT) AS
 BEGIN
     SELECT TOP(@n) id, authorId, groupId, content, createdAt FROM GroupMessage WHERE groupId = @groupId;
@@ -166,8 +174,30 @@ END
 GO
 
 
+/* APPLICATION ROLE AND PERMISSIONS */
+
+CREATE APPLICATION ROLE chatapp WITH PASSWORD = 'chatapp';
+GO
+
+-- TABLE (AND COLUMN) PERMISSIONS
+GRANT SELECT ON [social].[User] (username, lastOnline, joinedAt) TO chatapp;
+DENY SELECT ON [social].[User] (password) TO chatapp;
+DENY DELETE ON [social].[User] TO chatapp;
+GO
+
+GRANT SELECT ON [io].[GroupMessage] TO chatapp;
+DENY DELETE ON [io].[GroupMessage] TO chatapp;
+GO
+
+-- EXECUTE STORED PROCEDURES PERMISSIONS
+GRANT EXECUTE ON OBJECT::[social].[usp_GetAllUsers] TO chatapp;
+GRANT EXECUTE ON OBJECT::[social].[usp_GetUserByUsername] TO chatapp;
+GRANT EXECUTE ON OBJECT::[io].[usp_GetLastNGroupMessages] TO chatapp;
+GO
+
 
 /* INSERT DATA */
+
 INSERT [enum].[MemberRole] ([role])
 VALUES
     ('ADMIN'),
