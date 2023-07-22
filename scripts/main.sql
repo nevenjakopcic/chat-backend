@@ -188,6 +188,15 @@ BEGIN
 END
 GO
 
+-- GROUP
+
+CREATE PROCEDURE [social].[usp_CreateGroup] (@name AS VARCHAR(20)) AS
+BEGIN
+    INSERT INTO [social].[Group] (name, createdAt)
+    VALUES (@name, GETDATE());
+END
+GO
+
 -- GROUP MESSAGES
 
 CREATE PROCEDURE [io].[usp_GetLastNGroupMessages] (@groupId AS INT, @n AS INT) AS
@@ -216,6 +225,7 @@ GO
 GRANT EXECUTE ON OBJECT::[social].[usp_GetAllUsers] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_GetUserByUsername] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_CreateUser] TO chatapp;
+GRANT EXECUTE ON OBJECT::[social].[usp_CreateGroup] TO chatapp;
 GRANT EXECUTE ON OBJECT::[io].[usp_GetLastNGroupMessages] TO chatapp;
 GO
 
@@ -242,12 +252,9 @@ EXEC [social].[usp_CreateUser] @username = 'LuckyLuke', @password = 'password'; 
 EXEC [social].[usp_CreateUser] @username = 'JollyJumper', @password = 'password'; GO
 EXEC [social].[usp_CreateUser] @username = 'Rantanplan', @password = 'password'; GO
 
-INSERT [social].[Group] ([name], [createdAt])
-VALUES
-    (N'Goodsprings', GETDATE()),
-    (N'Primm', GETDATE()),
-    (N'New Vegas', GETDATE())
-GO
+EXEC [social].[usp_CreateGroup] @name = 'Goodsprings'; GO
+EXEC [social].[usp_CreateGroup] @name = 'Primm'; GO
+EXEC [social].[usp_CreateGroup] @name = 'New Vegas'; GO
 
 INSERT [social].[Member] ([groupId], [userId], [roleId], [joinedAt])
 VALUES
