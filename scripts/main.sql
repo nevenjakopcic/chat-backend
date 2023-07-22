@@ -26,7 +26,7 @@ GO
 CREATE TABLE [social].[User](
 	[id] INT PRIMARY KEY IDENTITY(1, 1),
 	[username] VARCHAR(20) NOT NULL,
-	[password] VARCHAR(20) NOT NULL,
+	[password] VARBINARY(4000) NOT NULL,
 	[lastOnline] DATETIME NOT NULL,
 	[joinedAt] DATETIME NOT NULL
 ) ON [PRIMARY]
@@ -150,6 +150,17 @@ GO
 
 /* ENCRYPTION */
 
+CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'MasterKeyPass';
+GO
+
+CREATE ASYMMETRIC KEY MyAsymmetricKey
+WITH ALGORITHM = RSA_2048;
+GO
+
+CREATE SYMMETRIC KEY MySymmetricKey
+WITH ALGORITHM = AES_256
+ENCRYPTION BY ASYMMETRIC KEY MyAsymmetricKey
+GO
 
 /* STORED PROCEDURES */
 
@@ -162,6 +173,18 @@ GO
 CREATE PROCEDURE [social].[usp_GetUserByUsername] (@username AS VARCHAR(20)) AS
 BEGIN
 	SELECT id, username, lastOnline, joinedAt FROM [social].[User] WHERE username = @username;
+END
+GO
+
+CREATE PROCEDURE [social].[usp_CreateUser] (@username AS VARCHAR(20), @password AS VARCHAR(50)) AS
+BEGIN
+    OPEN SYMMETRIC KEY MySymmetricKey
+    DECRYPTION BY ASYMMETRIC KEY MyAsymmetricKey;
+
+    INSERT INTO [social].[User] (username, password, lastOnline, joinedAt)
+    VALUES (@username, ENCRYPTBYKEY(KEY_GUID('MySymmetricKey'), @password), GETDATE(), GETDATE());
+
+    CLOSE SYMMETRIC KEY MySymmetricKey;
 END
 GO
 
@@ -192,6 +215,7 @@ GO
 -- EXECUTE STORED PROCEDURES PERMISSIONS
 GRANT EXECUTE ON OBJECT::[social].[usp_GetAllUsers] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_GetUserByUsername] TO chatapp;
+GRANT EXECUTE ON OBJECT::[social].[usp_CreateUser] TO chatapp;
 GRANT EXECUTE ON OBJECT::[io].[usp_GetLastNGroupMessages] TO chatapp;
 GO
 
@@ -214,12 +238,9 @@ VALUES
     ('block_both')
 GO
 
-INSERT [social].[User] ([username], [password], [lastOnline], [joinedAt]) 
-VALUES 
-    (N'LuckyLuke', N'password', GETDATE(), GETDATE()),
-    (N'JollyJumper', N'password', GETDATE(), GETDATE()),
-    (N'Rantanplan', N'password', GETDATE(), GETDATE())
-GO
+EXEC [social].[usp_CreateUser] @username = 'LuckyLuke', @password = 'password'; GO
+EXEC [social].[usp_CreateUser] @username = 'JollyJumper', @password = 'password'; GO
+EXEC [social].[usp_CreateUser] @username = 'Rantanplan', @password = 'password'; GO
 
 INSERT [social].[Group] ([name], [createdAt])
 VALUES
