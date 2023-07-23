@@ -162,6 +162,22 @@ WITH ALGORITHM = AES_256
 ENCRYPTION BY ASYMMETRIC KEY MyAsymmetricKey
 GO
 
+
+/* FUNCTIONS */
+
+CREATE FUNCTION [social].[fn_Compare] (@first VARCHAR(MAX), @second VARCHAR(MAX)) RETURNS BIT AS
+BEGIN
+    DECLARE @result BIT;
+
+    IF @first = @second
+        SET @result = 1;
+    ELSE
+        SET @result = 0;
+
+    RETURN @result;
+END
+
+
 /* STORED PROCEDURES */
 
 -- USER
@@ -173,6 +189,25 @@ GO
 CREATE PROCEDURE [social].[usp_GetUserByUsername] (@username AS VARCHAR(20)) AS
 BEGIN
 	SELECT id, username, lastOnline, joinedAt FROM [social].[User] WHERE username = @username;
+END
+GO
+
+CREATE PROCEDURE [social].[usp_AuthenticateUser] (@username AS VARCHAR(20),
+                                                  @password AS VARCHAR(50)) AS
+BEGIN
+    -- get the actual encrypted password
+    DECLARE @actualEncrypted VARBINARY(4000) = (SELECT password FROM [social].[User] WHERE username = @username)
+
+    -- decrypt it
+    OPEN SYMMETRIC KEY MySymmetricKey
+    DECRYPTION BY ASYMMETRIC KEY MyAsymmetricKey;
+
+    DECLARE @actual VARCHAR(50) = (SELECT CONVERT(VARCHAR(50), DECRYPTBYKEY(@actualEncrypted)))
+
+    CLOSE SYMMETRIC KEY MySymmetricKey;
+    
+    -- compare to the given password
+    SELECT([social].[fn_Compare](@password, @actual));
 END
 GO
 
@@ -224,6 +259,7 @@ GO
 -- EXECUTE STORED PROCEDURES PERMISSIONS
 GRANT EXECUTE ON OBJECT::[social].[usp_GetAllUsers] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_GetUserByUsername] TO chatapp;
+GRANT EXECUTE ON OBJECT::[social].[usp_AuthenticateUser] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_CreateUser] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_CreateGroup] TO chatapp;
 GRANT EXECUTE ON OBJECT::[io].[usp_GetLastNGroupMessages] TO chatapp;
