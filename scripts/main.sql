@@ -2,23 +2,21 @@
 USE chatdb
 
 
+/* ADMINISTRATION */
+
+CREATE USER [DB_Admin] WITHOUT LOGIN; GO
+CREATE ROLE [DB_Admins]; GO
+ALTER ROLE [DB_Admins] ADD MEMBER [DB_Admin]; GO
+GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::[io] TO DB_Admins; GO
+GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::[social] TO DB_Admins; GO
+GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::[enum] TO DB_Admins; GO
+
+
 /* SCHEMAS */
 
-IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = 'enum')
-BEGIN
-	EXEC('CREATE SCHEMA enum');
-END
-
-IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = 'social')
-BEGIN
-	EXEC('CREATE SCHEMA social');
-END
-
-IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = 'io')
-BEGIN
-	EXEC('CREATE SCHEMA io');
-END
-GO
+EXEC('CREATE SCHEMA enum'); GO
+EXEC('CREATE SCHEMA social'); GO
+EXEC('CREATE SCHEMA io'); GO
 
 
 /* TABLES */
@@ -205,7 +203,7 @@ BEGIN
     DECLARE @actual VARCHAR(50) = (SELECT CONVERT(VARCHAR(50), DECRYPTBYKEY(@actualEncrypted)))
 
     CLOSE SYMMETRIC KEY MySymmetricKey;
-    
+
     -- compare to the given password
     SELECT([social].[fn_Compare](@password, @actual));
 END

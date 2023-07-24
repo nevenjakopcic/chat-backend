@@ -1,8 +1,10 @@
 /* CLEANUP */
 USE chatdb;
 
-DROP ROLE IF EXISTS chatapp;
-GO
+DROP USER DB_Admin; GO
+DROP ROLE IF EXISTS DB_Admins; GO
+
+DROP ROLE IF EXISTS chatapp; GO
 
 DROP SYMMETRIC KEY MySymmetricKey; GO
 DROP ASYMMETRIC KEY MyAsymmetricKey; GO
