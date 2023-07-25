@@ -1,7 +1,7 @@
 /* CLEANUP */
 USE chatdb;
 
-DROP USER DB_Admin; GO
+DROP USER IF EXISTS DB_Admin; GO
 DROP ROLE IF EXISTS DB_Admins; GO
 
 DROP ROLE IF EXISTS chatapp; GO

@@ -20,6 +20,7 @@ public class UserDto implements Serializable {
 
     private Long id;
     private String username;
+    private String email;
     private LocalDateTime lastOnline;
     private LocalDateTime joinedAt;
 }

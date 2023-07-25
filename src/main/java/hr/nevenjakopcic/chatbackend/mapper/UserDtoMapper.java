@@ -9,6 +9,7 @@ public class UserDtoMapper {
         return UserDto.builder()
             .id(source.getId())
             .username(source.getUsername())
+            .email(source.getEmail())
             .lastOnline(source.getLastOnline())
             .joinedAt(source.getJoinedAt())
             .build();

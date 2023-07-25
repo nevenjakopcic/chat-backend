@@ -1,6 +1,12 @@
 /* main.sql */
 USE chatdb
 
+/* SCHEMAS */
+
+EXEC('CREATE SCHEMA enum'); GO
+EXEC('CREATE SCHEMA social'); GO
+EXEC('CREATE SCHEMA io'); GO
+
 
 /* ADMINISTRATION */
 
@@ -12,19 +18,13 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::[social] TO DB_Admins; GO
 GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::[enum] TO DB_Admins; GO
 
 
-/* SCHEMAS */
-
-EXEC('CREATE SCHEMA enum'); GO
-EXEC('CREATE SCHEMA social'); GO
-EXEC('CREATE SCHEMA io'); GO
-
-
 /* TABLES */
 
 CREATE TABLE [social].[User](
 	[id] INT PRIMARY KEY IDENTITY(1, 1),
 	[username] VARCHAR(20) NOT NULL,
 	[password] VARBINARY(4000) NOT NULL,
+	[email] VARCHAR(50) NOT NULL,
 	[lastOnline] DATETIME NOT NULL,
 	[joinedAt] DATETIME NOT NULL
 ) ON [PRIMARY]
@@ -138,12 +138,12 @@ GO
 
 /* INDEXES */
 
-CREATE UNIQUE NONCLUSTERED INDEX [IX_User_Username] ON [social].[User] ("username")
-GO
+CREATE UNIQUE NONCLUSTERED INDEX [IX_User_Username] ON [social].[User] ("username"); GO
+
+CREATE UNIQUE NONCLUSTERED INDEX [IX_User_Email] ON [social].[User] ("email"); GO
 
 CREATE NONCLUSTERED INDEX [IX_Notification_NotRead] ON [IO].[Notification] ("isRead")
-WHERE isRead = 0
-GO
+WHERE isRead = 0; GO
 
 
 /* ENCRYPTION */
@@ -161,6 +161,12 @@ ENCRYPTION BY ASYMMETRIC KEY MyAsymmetricKey
 GO
 
 
+/* DYNAMIC MASKING */
+
+ALTER TABLE [social].[User] ALTER COLUMN email ADD MASKED WITH(FUNCTION = 'email()'); GO
+ALTER TABLE [social].[User] ALTER COLUMN joinedAt ADD MASKED WITH(FUNCTION = 'default()'); GO
+
+
 /* FUNCTIONS */
 
 CREATE FUNCTION [social].[fn_Compare] (@first VARCHAR(MAX), @second VARCHAR(MAX)) RETURNS BIT AS
@@ -174,6 +180,7 @@ BEGIN
 
     RETURN @result;
 END
+GO
 
 
 /* STORED PROCEDURES */
@@ -181,12 +188,12 @@ END
 -- USER
 
 CREATE PROCEDURE [social].[usp_GetAllUsers] AS
-	SELECT id, username, lastOnline, joinedAt FROM [social].[User];
+	SELECT id, username, email, lastOnline, joinedAt FROM [social].[User];
 GO
 
 CREATE PROCEDURE [social].[usp_GetUserByUsername] (@username AS VARCHAR(20)) AS
 BEGIN
-	SELECT id, username, lastOnline, joinedAt FROM [social].[User] WHERE username = @username;
+	SELECT id, username, email, lastOnline, joinedAt FROM [social].[User] WHERE username = @username;
 END
 GO
 
@@ -209,13 +216,15 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE [social].[usp_CreateUser] (@username AS VARCHAR(20), @password AS VARCHAR(50)) AS
+CREATE PROCEDURE [social].[usp_CreateUser] (@username AS VARCHAR(20),
+                                            @password AS VARCHAR(50),
+                                            @email AS VARCHAR(50)) AS
 BEGIN
     OPEN SYMMETRIC KEY MySymmetricKey
     DECRYPTION BY ASYMMETRIC KEY MyAsymmetricKey;
 
-    INSERT INTO [social].[User] (username, password, lastOnline, joinedAt)
-    VALUES (@username, ENCRYPTBYKEY(KEY_GUID('MySymmetricKey'), @password), GETDATE(), GETDATE());
+    INSERT INTO [social].[User] (username, password, email, lastOnline, joinedAt)
+    VALUES (@username, ENCRYPTBYKEY(KEY_GUID('MySymmetricKey'), @password), @email, GETDATE(), GETDATE());
 
     CLOSE SYMMETRIC KEY MySymmetricKey;
 END
@@ -245,7 +254,7 @@ CREATE APPLICATION ROLE chatapp WITH PASSWORD = 'chatapp';
 GO
 
 -- TABLE (AND COLUMN) PERMISSIONS
-GRANT SELECT ON [social].[User] (username, lastOnline, joinedAt) TO chatapp;
+GRANT SELECT ON [social].[User] (username, email, lastOnline, joinedAt) TO chatapp;
 DENY SELECT ON [social].[User] (password) TO chatapp;
 DENY DELETE ON [social].[User] TO chatapp;
 GO
@@ -282,9 +291,9 @@ VALUES
     ('block_both')
 GO
 
-EXEC [social].[usp_CreateUser] @username = 'LuckyLuke', @password = 'password'; GO
-EXEC [social].[usp_CreateUser] @username = 'JollyJumper', @password = 'password'; GO
-EXEC [social].[usp_CreateUser] @username = 'Rantanplan', @password = 'password'; GO
+EXEC [social].[usp_CreateUser] @username = 'LuckyLuke', @password = 'password', @email = 'luckyluke@mail.com'; GO
+EXEC [social].[usp_CreateUser] @username = 'JollyJumper', @password = 'password', @email = 'jollyjumper@mail.com'; GO
+EXEC [social].[usp_CreateUser] @username = 'Rantanplan', @password = 'password', @email = 'rantanplan@mail.com'; GO
 
 EXEC [social].[usp_CreateGroup] @name = 'Goodsprings'; GO
 EXEC [social].[usp_CreateGroup] @name = 'Primm'; GO
