@@ -4,7 +4,7 @@ USE chatdb;
 DROP USER IF EXISTS DB_Admin; GO
 DROP ROLE IF EXISTS DB_Admins; GO
 
-DROP ROLE IF EXISTS chatapp; GO
+DROP APPLICATION ROLE chatapp; GO
 
 DROP SYMMETRIC KEY MySymmetricKey; GO
 DROP ASYMMETRIC KEY MyAsymmetricKey; GO
@@ -16,6 +16,7 @@ DROP PROCEDURE IF EXISTS [social].[usp_AuthenticateUser]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_CreateUser]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_CreateGroup]; GO
 DROP PROCEDURE IF EXISTS [io].[usp_GetLastNGroupMessages]; GO
+DROP PROCEDURE IF EXISTS [io].[usp_SendGroupMessage]; GO
 
 DROP FUNCTION IF EXISTS [social].[fn_Compare]; GO
 

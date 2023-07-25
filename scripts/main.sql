@@ -247,6 +247,13 @@ BEGIN
 END
 GO
 
+CREATE PROCEDURE [io].[usp_SendGroupMessage] (@authorId AS INT, @groupId AS INT, @content AS VARCHAR(5000)) AS
+BEGIN
+    INSERT INTO [io].[GroupMessage] (authorId, groupId, content, createdAt)
+    VALUES (@authorId, @groupId, @content, GETDATE());
+END
+GO
+
 
 /* APPLICATION ROLE AND PERMISSIONS */
 
@@ -259,7 +266,7 @@ DENY SELECT ON [social].[User] (password) TO chatapp;
 DENY DELETE ON [social].[User] TO chatapp;
 GO
 
-GRANT SELECT ON [io].[GroupMessage] TO chatapp;
+GRANT SELECT, INSERT ON [io].[GroupMessage] TO chatapp;
 DENY DELETE ON [io].[GroupMessage] TO chatapp;
 GO
 
@@ -270,6 +277,7 @@ GRANT EXECUTE ON OBJECT::[social].[usp_AuthenticateUser] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_CreateUser] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_CreateGroup] TO chatapp;
 GRANT EXECUTE ON OBJECT::[io].[usp_GetLastNGroupMessages] TO chatapp;
+GRANT EXECUTE ON OBJECT::[io].[usp_SendGroupMessage] TO chatapp;
 GO
 
 
@@ -307,11 +315,8 @@ VALUES
     (2, 3, 1, GETDATE())
 GO
 
-INSERT [io].[GroupMessage] ([authorId], [groupId], [content], [createdAt])
-VALUES
-    (1, 1, N'First message in Goodsprings', DATEADD(mi, -5, GETDATE())),
-    (2, 1, N'Second message in Goodsprings!', DATEADD(mi, -4, GETDATE())),
-    (3, 2, N'Third message ever, first in Primm!', DATEADD(mi, -3, GETDATE())),
-    (2, 1, N'Third message in Goodsprings', DATEADD(mi, -2, GETDATE())),
-    (3, 1, N'Fourth message in Goodsprings', DATEADD(mi, -1, GETDATE()))
-GO
+EXEC [io].[usp_SendGroupMessage] @authorId = 1, @groupId = 1, @content = N'First message in Goodsprings'; GO
+EXEC [io].[usp_SendGroupMessage] @authorId = 2, @groupId = 1, @content = N'Second message in Goodsprings'; GO
+EXEC [io].[usp_SendGroupMessage] @authorId = 3, @groupId = 2, @content = N'Third message ever, first in Primm'; GO
+EXEC [io].[usp_SendGroupMessage] @authorId = 2, @groupId = 1, @content = N'Third message in Goodsprings'; GO
+EXEC [io].[usp_SendGroupMessage] @authorId = 3, @groupId = 1, @content = N'Fourth message in Goodsprings'; GO
