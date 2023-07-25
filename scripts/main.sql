@@ -146,6 +146,21 @@ CREATE NONCLUSTERED INDEX [IX_Notification_NotRead] ON [IO].[Notification] ("isR
 WHERE isRead = 0; GO
 
 
+/* TRIGGERS */
+
+CREATE OR ALTER TRIGGER [io].[tr_UpdateLastOnlineOfGroupMessageAuthor] ON [io].[GroupMessage]
+AFTER INSERT
+AS
+BEGIN
+    DECLARE @authorId INT = (SELECT authorId from inserted);
+
+    UPDATE [social].[User]
+    SET lastOnline = GETDATE()
+    WHERE id = @authorId;
+END
+GO
+
+
 /* ENCRYPTION */
 
 CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'MasterKeyPass';
@@ -239,6 +254,17 @@ BEGIN
 END
 GO
 
+-- GROUP MEMBER
+
+CREATE PROCEDURE [social].[usp_AddMember] (@groupId AS INT, @userId AS INT) AS
+BEGIN
+    DECLARE @userRoleId INT = (SELECT id FROM [enum].[MemberRole] WHERE role = 'MEMBER')
+
+    INSERT INTO [social].[Member] (groupId, userId, roleId, joinedAt)
+    VALUES (@groupId, @userId, @userRoleId, GETDATE());
+END
+GO
+
 -- GROUP MESSAGES
 
 CREATE PROCEDURE [io].[usp_GetLastNGroupMessages] (@groupId AS INT, @n AS INT) AS
@@ -276,6 +302,7 @@ GRANT EXECUTE ON OBJECT::[social].[usp_GetUserByUsername] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_AuthenticateUser] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_CreateUser] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_CreateGroup] TO chatapp;
+GRANT EXECUTE ON OBJECT::[social].[usp_AddMember] TO chatapp;
 GRANT EXECUTE ON OBJECT::[io].[usp_GetLastNGroupMessages] TO chatapp;
 GRANT EXECUTE ON OBJECT::[io].[usp_SendGroupMessage] TO chatapp;
 GO
@@ -307,13 +334,10 @@ EXEC [social].[usp_CreateGroup] @name = 'Goodsprings'; GO
 EXEC [social].[usp_CreateGroup] @name = 'Primm'; GO
 EXEC [social].[usp_CreateGroup] @name = 'New Vegas'; GO
 
-INSERT [social].[Member] ([groupId], [userId], [roleId], [joinedAt])
-VALUES
-    (1, 1, 1, GETDATE()),
-    (1, 2, 1, GETDATE()),
-    (1, 3, 2, GETDATE()),
-    (2, 3, 1, GETDATE())
-GO
+EXEC [social].[usp_AddMember] @groupId = 1, @userId = 1; GO
+EXEC [social].[usp_AddMember] @groupId = 1, @userId = 2; GO
+EXEC [social].[usp_AddMember] @groupId = 1, @userId = 3; GO
+EXEC [social].[usp_AddMember] @groupId = 2, @userId = 3; GO
 
 EXEC [io].[usp_SendGroupMessage] @authorId = 1, @groupId = 1, @content = N'First message in Goodsprings'; GO
 EXEC [io].[usp_SendGroupMessage] @authorId = 2, @groupId = 1, @content = N'Second message in Goodsprings'; GO
