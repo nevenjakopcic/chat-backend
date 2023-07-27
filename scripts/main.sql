@@ -1,5 +1,20 @@
 /* main.sql */
-USE chatdb
+
+/* MAINTENANCE AND ADMINISTRATION */
+USE master;
+
+-- SERVER AUDIT
+CREATE SERVER AUDIT My_Audit TO FILE (FILEPATH = 'C:\Users\ltpt4\OneDrive\Desktop\NOSQL i BAZE\BAZE\audits'); GO
+ALTER SERVER AUDIT My_Audit WITH (STATE = ON); GO
+
+
+USE chatdb;
+
+-- ADMIN USER AND ROLE
+CREATE USER [DB_Admin] WITHOUT LOGIN; GO
+CREATE ROLE [DB_Admins]; GO
+ALTER ROLE [DB_Admins] ADD MEMBER [DB_Admin]; GO
+
 
 /* SCHEMAS */
 
@@ -7,16 +22,9 @@ EXEC('CREATE SCHEMA enum'); GO
 EXEC('CREATE SCHEMA social'); GO
 EXEC('CREATE SCHEMA io'); GO
 
-
-/* ADMINISTRATION */
-
-CREATE USER [DB_Admin] WITHOUT LOGIN; GO
-CREATE ROLE [DB_Admins]; GO
-ALTER ROLE [DB_Admins] ADD MEMBER [DB_Admin]; GO
 GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::[io] TO DB_Admins; GO
 GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::[social] TO DB_Admins; GO
 GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::[enum] TO DB_Admins; GO
-
 
 /* TABLES */
 
@@ -318,6 +326,16 @@ GRANT EXECUTE ON OBJECT::[social].[usp_AddMember] TO chatapp;
 GRANT EXECUTE ON OBJECT::[io].[usp_GetLastNGroupMessages] TO chatapp;
 GRANT EXECUTE ON OBJECT::[io].[usp_SendGroupMessage] TO chatapp;
 GO
+
+/* DATABASE AUDITS */
+CREATE DATABASE AUDIT SPECIFICATION Audit_DataManipulation FOR SERVER AUDIT My_Audit; GO
+
+ALTER DATABASE AUDIT SPECIFICATION Audit_DataManipulation FOR SERVER AUDIT My_Audit
+    ADD (SELECT, INSERT, UPDATE ON [social].[User] BY chatapp, dbo),
+    ADD (SELECT, INSERT, UPDATE ON [social].[Group] BY chatapp, dbo),
+    ADD (SELECT, INSERT, UPDATE ON [social].[Member] BY chatapp, dbo),
+    ADD (SELECT, INSERT, UPDATE ON [io].[GroupMessage] BY chatapp, dbo)
+        WITH (STATE = ON); GO
 
 
 /* INSERT DATA */
