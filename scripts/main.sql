@@ -33,7 +33,8 @@ GO
 CREATE TABLE [social].[Group](
 	[id] INT PRIMARY KEY IDENTITY(1, 1),
 	[name] VARCHAR(20) NOT NULL,
-	[createdAt] DATETIME NOT NULL
+	[createdAt] DATETIME NOT NULL,
+	[lastActivity] DATETIME NOT NULL
 ) ON [PRIMARY]
 GO
 
@@ -142,24 +143,35 @@ CREATE UNIQUE NONCLUSTERED INDEX [IX_User_Username] ON [social].[User] ("usernam
 
 CREATE UNIQUE NONCLUSTERED INDEX [IX_User_Email] ON [social].[User] ("email"); GO
 
-CREATE NONCLUSTERED INDEX [IX_Notification_NotRead] ON [IO].[Notification] ("isRead")
+CREATE NONCLUSTERED INDEX [IX_Notification_NotRead] ON [io].[Notification] ("isRead")
 WHERE isRead = 0; GO
 
 
 /* TRIGGERS */
 
-CREATE OR ALTER TRIGGER [io].[tr_UpdateLastOnlineOfGroupMessageAuthor] ON [io].[GroupMessage]
+CREATE OR ALTER TRIGGER [tr_GroupMessage_Insert] ON [io].[GroupMessage]
 AFTER INSERT
 AS
 BEGIN
+    DECLARE @currentTime DATETIME = GETDATE();
     DECLARE @authorId INT = (SELECT authorId from inserted);
+    DECLARE @groupId INT = (SELECT groupId from inserted);
 
-    UPDATE [social].[User]
-    SET lastOnline = GETDATE()
-    WHERE id = @authorId;
+    UPDATE [social].[User] SET lastOnline = @currentTime WHERE id = @authorId;
+    UPDATE [social].[Group] SET lastActivity = @currentTime WHERE id = @groupId;
 END
 GO
 
+CREATE OR ALTER TRIGGER [tr_Member_Insert] ON [social].[Member]
+AFTER INSERT
+AS
+BEGIN
+    DECLARE @currentTime DATETIME = GETDATE();
+    DECLARE @groupId INT = (SELECT groupId from inserted);
+
+    UPDATE [social].[Group] SET lastActivity = @currentTime WHERE id = @groupId;
+END
+GO
 
 /* ENCRYPTION */
 
@@ -249,8 +261,8 @@ GO
 
 CREATE PROCEDURE [social].[usp_CreateGroup] (@name AS VARCHAR(20)) AS
 BEGIN
-    INSERT INTO [social].[Group] (name, createdAt)
-    VALUES (@name, GETDATE());
+    INSERT INTO [social].[Group] (name, createdAt, lastActivity)
+    VALUES (@name, GETDATE(), GETDATE());
 END
 GO
 
