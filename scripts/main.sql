@@ -7,6 +7,8 @@ USE master;
 CREATE SERVER AUDIT My_Audit TO FILE (FILEPATH = 'C:\Users\ltpt4\OneDrive\Desktop\NOSQL i BAZE\BAZE\audits'); GO
 ALTER SERVER AUDIT My_Audit WITH (STATE = ON); GO
 
+CREATE SERVER AUDIT My_Audit2 TO FILE (FILEPATH = 'C:\Users\ltpt4\OneDrive\Desktop\NOSQL i BAZE\BAZE\audits'); GO
+ALTER SERVER AUDIT My_Audit2 WITH (STATE = ON); GO
 
 USE chatdb;
 
@@ -338,13 +340,20 @@ GRANT EXECUTE ON OBJECT::[io].[usp_SendGroupMessage] TO chatapp, imp_user;
 GO
 
 /* DATABASE AUDITS */
-CREATE DATABASE AUDIT SPECIFICATION Audit_DataManipulation FOR SERVER AUDIT My_Audit; GO
+CREATE DATABASE AUDIT SPECIFICATION Audit_DataReading FOR SERVER AUDIT My_Audit; GO
+ALTER DATABASE AUDIT SPECIFICATION Audit_DataReading FOR SERVER AUDIT My_Audit
+    ADD (SELECT ON [social].[User] BY chatapp, dbo),
+    ADD (SELECT ON [social].[Group] BY chatapp, dbo),
+    ADD (SELECT ON [social].[Member] BY chatapp, dbo),
+    ADD (SELECT ON [io].[GroupMessage] BY chatapp, dbo)
+    WITH (STATE = ON); GO
 
-ALTER DATABASE AUDIT SPECIFICATION Audit_DataManipulation FOR SERVER AUDIT My_Audit
-    ADD (SELECT, INSERT, UPDATE ON [social].[User] BY chatapp, dbo),
-    ADD (SELECT, INSERT, UPDATE ON [social].[Group] BY chatapp, dbo),
-    ADD (SELECT, INSERT, UPDATE ON [social].[Member] BY chatapp, dbo),
-    ADD (SELECT, INSERT, UPDATE ON [io].[GroupMessage] BY chatapp, dbo)
+CREATE DATABASE AUDIT SPECIFICATION Audit_DataManipulation FOR SERVER AUDIT My_Audit2; GO
+ALTER DATABASE AUDIT SPECIFICATION Audit_DataManipulation FOR SERVER AUDIT My_Audit2
+    ADD (INSERT, UPDATE ON [social].[User] BY chatapp, dbo),
+    ADD (INSERT, UPDATE ON [social].[Group] BY chatapp, dbo),
+    ADD (INSERT, UPDATE ON [social].[Member] BY chatapp, dbo),
+    ADD (INSERT, UPDATE ON [io].[GroupMessage] BY chatapp, dbo)
         WITH (STATE = ON); GO
 
 
