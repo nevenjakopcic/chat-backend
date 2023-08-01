@@ -289,7 +289,7 @@ GO
 
 CREATE PROCEDURE [io].[usp_GetLastNGroupMessages] (@groupId AS INT, @n AS INT) AS
 BEGIN
-    SELECT TOP(@n) id, authorId, groupId, content, createdAt FROM GroupMessage WHERE groupId = @groupId;
+    SELECT TOP(@n) id, authorId, groupId, content, createdAt FROM GroupMessage WHERE groupId = @groupId ORDER BY id DESC;
 END
 GO
 
@@ -301,30 +301,40 @@ END
 GO
 
 
-/* APPLICATION ROLE AND PERMISSIONS */
+/* IMPERSONALIZATION, APPLICATION ROLE AND PERMISSIONS */
 
-CREATE APPLICATION ROLE chatapp WITH PASSWORD = 'chatapp';
-GO
+USE [master];
+
+CREATE LOGIN [dummy] WITH PASSWORD=N'dummy', DEFAULT_DATABASE=[tempdb]; GO
+DENY VIEW ANY DATABASE TO [dummy]; GO
+
+USE [chatdb];
+
+CREATE USER [dummy_user] FOR LOGIN [dummy]; GO
+CREATE USER [imp_user] WITHOUT LOGIN; GO
+GRANT IMPERSONATE ON USER::[imp_user] to [dummy_user]; GO
+
+CREATE APPLICATION ROLE chatapp WITH PASSWORD = 'chatapp'; GO
 
 -- TABLE (AND COLUMN) PERMISSIONS
-GRANT SELECT ON [social].[User] (username, email, lastOnline, joinedAt) TO chatapp;
-DENY SELECT ON [social].[User] (password) TO chatapp;
-DENY DELETE ON [social].[User] TO chatapp;
+GRANT SELECT ON [social].[User] (username, email, lastOnline, joinedAt) TO chatapp, imp_user;
+DENY SELECT ON [social].[User] (password) TO chatapp, imp_user;
+DENY DELETE ON [social].[User] TO chatapp, imp_user;
 GO
 
-GRANT SELECT, INSERT ON [io].[GroupMessage] TO chatapp;
-DENY DELETE ON [io].[GroupMessage] TO chatapp;
+GRANT SELECT, INSERT ON [io].[GroupMessage] TO chatapp, imp_user;
+DENY DELETE ON [io].[GroupMessage] TO chatapp, imp_user;
 GO
 
 -- EXECUTE STORED PROCEDURES PERMISSIONS
-GRANT EXECUTE ON OBJECT::[social].[usp_GetAllUsers] TO chatapp;
-GRANT EXECUTE ON OBJECT::[social].[usp_GetUserByUsername] TO chatapp;
-GRANT EXECUTE ON OBJECT::[social].[usp_AuthenticateUser] TO chatapp;
-GRANT EXECUTE ON OBJECT::[social].[usp_CreateUser] TO chatapp;
-GRANT EXECUTE ON OBJECT::[social].[usp_CreateGroup] TO chatapp;
-GRANT EXECUTE ON OBJECT::[social].[usp_AddMember] TO chatapp;
-GRANT EXECUTE ON OBJECT::[io].[usp_GetLastNGroupMessages] TO chatapp;
-GRANT EXECUTE ON OBJECT::[io].[usp_SendGroupMessage] TO chatapp;
+GRANT EXECUTE ON OBJECT::[social].[usp_GetAllUsers] TO chatapp, imp_user;
+GRANT EXECUTE ON OBJECT::[social].[usp_GetUserByUsername] TO chatapp, imp_user;
+GRANT EXECUTE ON OBJECT::[social].[usp_AuthenticateUser] TO chatapp, imp_user;
+GRANT EXECUTE ON OBJECT::[social].[usp_CreateUser] TO chatapp, imp_user;
+GRANT EXECUTE ON OBJECT::[social].[usp_CreateGroup] TO chatapp, imp_user;
+GRANT EXECUTE ON OBJECT::[social].[usp_AddMember] TO chatapp, imp_user;
+GRANT EXECUTE ON OBJECT::[io].[usp_GetLastNGroupMessages] TO chatapp, imp_user;
+GRANT EXECUTE ON OBJECT::[io].[usp_SendGroupMessage] TO chatapp, imp_user;
 GO
 
 /* DATABASE AUDITS */
@@ -374,3 +384,7 @@ EXEC [io].[usp_SendGroupMessage] @authorId = 2, @groupId = 1, @content = N'Secon
 EXEC [io].[usp_SendGroupMessage] @authorId = 3, @groupId = 2, @content = N'Third message ever, first in Primm'; GO
 EXEC [io].[usp_SendGroupMessage] @authorId = 2, @groupId = 1, @content = N'Third message in Goodsprings'; GO
 EXEC [io].[usp_SendGroupMessage] @authorId = 3, @groupId = 1, @content = N'Fourth message in Goodsprings'; GO
+EXEC [io].[usp_SendGroupMessage] @authorId = 1, @groupId = 1, @content = N'After the first full backup!'; GO
+EXEC [io].[usp_SendGroupMessage] @authorId = 1, @groupId = 1, @content = N'After the first differential backup!'; GO
+EXEC [io].[usp_SendGroupMessage] @authorId = 1, @groupId = 1, @content = N'After the first transaction log backup!'; GO
+EXEC [io].[usp_SendGroupMessage] @authorId = 1, @groupId = 1, @content = N'After the second transaction log backup!'; GO
