@@ -1,32 +1,19 @@
 /* main.sql */
 
-/* MAINTENANCE AND ADMINISTRATION */
-USE master;
+USE [master];
 
--- SERVER AUDIT
-CREATE SERVER AUDIT My_Audit TO FILE (FILEPATH = 'C:\Users\ltpt4\OneDrive\Desktop\NOSQL i BAZE\BAZE\audits'); GO
-ALTER SERVER AUDIT My_Audit WITH (STATE = ON); GO
+/* DUMMY USER */
 
-CREATE SERVER AUDIT My_Audit2 TO FILE (FILEPATH = 'C:\Users\ltpt4\OneDrive\Desktop\NOSQL i BAZE\BAZE\audits'); GO
-ALTER SERVER AUDIT My_Audit2 WITH (STATE = ON); GO
+CREATE LOGIN [dummy] WITH PASSWORD=N'dummy', DEFAULT_DATABASE=[tempdb]; GO
+DENY VIEW ANY DATABASE TO [dummy]; GO
 
-USE chatdb;
-
--- ADMIN USER AND ROLE
-CREATE USER [DB_Admin] WITHOUT LOGIN; GO
-CREATE ROLE [DB_Admins]; GO
-ALTER ROLE [DB_Admins] ADD MEMBER [DB_Admin]; GO
-
+USE [chatdb];
 
 /* SCHEMAS */
 
-EXEC('CREATE SCHEMA enum'); GO
-EXEC('CREATE SCHEMA social'); GO
-EXEC('CREATE SCHEMA io'); GO
-
-GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::[io] TO DB_Admins; GO
-GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::[social] TO DB_Admins; GO
-GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::[enum] TO DB_Admins; GO
+CREATE SCHEMA enum; GO
+CREATE SCHEMA social; GO
+CREATE SCHEMA io; GO
 
 /* TABLES */
 
@@ -37,7 +24,7 @@ CREATE TABLE [social].[User](
 	[email] VARCHAR(50) NOT NULL,
 	[lastOnline] DATETIME NOT NULL,
 	[joinedAt] DATETIME NOT NULL
-) ON [PRIMARY]
+) ON [PRIMARY];
 GO
 
 CREATE TABLE [social].[Group](
@@ -45,7 +32,7 @@ CREATE TABLE [social].[Group](
 	[name] VARCHAR(20) NOT NULL,
 	[createdAt] DATETIME NOT NULL,
 	[lastActivity] DATETIME NOT NULL
-) ON [PRIMARY]
+) ON [PRIMARY];
 GO
 
 CREATE TABLE [io].[GroupMessage](
@@ -58,13 +45,13 @@ CREATE TABLE [io].[GroupMessage](
 		REFERENCES [social].[User](id),
 	CONSTRAINT FK_GroupMessage_GroupId FOREIGN KEY (groupId)
 		REFERENCES [social].[Group](id)
-) ON [PRIMARY]
+) ON [PRIMARY];
 GO
 
 CREATE TABLE [enum].[MemberRole](
 	[id] INT PRIMARY KEY IDENTITY(1, 1),
 	[role] VARCHAR(20) NOT NULL
-) ON [PRIMARY]
+) ON [PRIMARY];
 GO
 
 CREATE TABLE [social].[Member](
@@ -79,7 +66,7 @@ CREATE TABLE [social].[Member](
 	CONSTRAINT FK_Member_RoleId FOREIGN KEY (roleId)
 		REFERENCES [enum].[MemberRole](id),
 	PRIMARY KEY (groupId, userId)
-) ON [PRIMARY]
+) ON [PRIMARY];
 GO
 
 CREATE TABLE [io].[PrivateMessage](
@@ -92,13 +79,13 @@ CREATE TABLE [io].[PrivateMessage](
 		REFERENCES [social].[User](id),
 	CONSTRAINT FK_PrivateMessage_RecipientId FOREIGN KEY (recipientId)
 		REFERENCES [social].[User](id)
-) ON [PRIMARY]
+) ON [PRIMARY];
 GO
 
 CREATE TABLE [enum].[RelationshipStatus](
 	[id] INT PRIMARY KEY IDENTITY(1, 1),
 	[status] VARCHAR(20) NOT NULL
-) ON [PRIMARY]
+) ON [PRIMARY];
 GO
 
 CREATE TABLE [social].[Relationship](
@@ -113,7 +100,7 @@ CREATE TABLE [social].[Relationship](
 	CONSTRAINT FK_Relationship_StatusId FOREIGN KEY (statusId)
 		REFERENCES [enum].[RelationshipStatus](id),
 	PRIMARY KEY (user1Id, user2Id)
-) ON [PRIMARY]
+) ON [PRIMARY];
 GO
 
 CREATE TABLE [io].[Notification](
@@ -127,7 +114,7 @@ CREATE TABLE [io].[Notification](
 		REFERENCES [social].[User](id),
 	CONSTRAINT FK_Notification_GroupId FOREIGN KEY (groupId)
 		REFERENCES [social].[Group](id),
-) ON [PRIMARY]
+) ON [PRIMARY];
 GO
 
 CREATE TABLE [io].[GroupMessageAttachment](
@@ -136,16 +123,15 @@ CREATE TABLE [io].[GroupMessageAttachment](
 	[messageId] INT NOT NULL,
 	CONSTRAINT FK_GroupMessageAttachment_MessageId FOREIGN KEY (messageId)
 		REFERENCES [io].[GroupMessage](id)
-) ON [PRIMARY]
+) ON [PRIMARY];
 GO
 
 
 /* CONSTRAINTS */
 
-ALTER TABLE [social].[User]  WITH CHECK 
-	ADD CONSTRAINT [CK_User_username_length] CHECK ((len([username])>(2) AND len([username])<(21)))
+ALTER TABLE [social].[User] WITH CHECK
+	ADD CONSTRAINT [CK_User_username_length] CHECK ((len([username])>(2) AND len([username])<(21)));
 GO
-
 
 /* INDEXES */
 
@@ -183,25 +169,15 @@ BEGIN
 END
 GO
 
+
 /* ENCRYPTION */
 
-CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'MasterKeyPass';
-GO
+CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'MasterKeyPass'; GO
 
-CREATE ASYMMETRIC KEY MyAsymmetricKey
-WITH ALGORITHM = RSA_2048;
-GO
+CREATE ASYMMETRIC KEY MyAsymmetricKey WITH ALGORITHM = RSA_2048; GO
 
-CREATE SYMMETRIC KEY MySymmetricKey
-WITH ALGORITHM = AES_256
-ENCRYPTION BY ASYMMETRIC KEY MyAsymmetricKey
-GO
-
-
-/* DYNAMIC MASKING */
-
-ALTER TABLE [social].[User] ALTER COLUMN email ADD MASKED WITH(FUNCTION = 'email()'); GO
-ALTER TABLE [social].[User] ALTER COLUMN joinedAt ADD MASKED WITH(FUNCTION = 'default()'); GO
+CREATE SYMMETRIC KEY MySymmetricKey WITH ALGORITHM = AES_256
+ENCRYPTION BY ASYMMETRIC KEY MyAsymmetricKey; GO
 
 
 /* FUNCTIONS */
@@ -303,58 +279,30 @@ END
 GO
 
 
-/* IMPERSONALIZATION, APPLICATION ROLE AND PERMISSIONS */
-
-USE [master];
-
-CREATE LOGIN [dummy] WITH PASSWORD=N'dummy', DEFAULT_DATABASE=[tempdb]; GO
-DENY VIEW ANY DATABASE TO [dummy]; GO
-
-USE [chatdb];
-
-CREATE USER [dummy_user] FOR LOGIN [dummy]; GO
-CREATE USER [imp_user] WITHOUT LOGIN; GO
-GRANT IMPERSONATE ON USER::[imp_user] to [dummy_user]; GO
+/* APPLICATION ROLE AND PERMISSIONS */
 
 CREATE APPLICATION ROLE chatapp WITH PASSWORD = 'chatapp'; GO
 
 -- TABLE (AND COLUMN) PERMISSIONS
-GRANT SELECT ON [social].[User] (username, email, lastOnline, joinedAt) TO chatapp, imp_user;
-DENY SELECT ON [social].[User] (password) TO chatapp, imp_user;
-DENY DELETE ON [social].[User] TO chatapp, imp_user;
+GRANT SELECT ON [social].[User] (username, email, lastOnline, joinedAt) TO chatapp;
+DENY SELECT ON [social].[User] (password) TO chatapp;
+DENY DELETE ON [social].[User] TO chatapp;
 GO
 
-GRANT SELECT, INSERT ON [io].[GroupMessage] TO chatapp, imp_user;
-DENY DELETE ON [io].[GroupMessage] TO chatapp, imp_user;
+GRANT SELECT, INSERT ON [io].[GroupMessage] TO chatapp;
+DENY DELETE ON [io].[GroupMessage] TO chatapp;
 GO
 
 -- EXECUTE STORED PROCEDURES PERMISSIONS
-GRANT EXECUTE ON OBJECT::[social].[usp_GetAllUsers] TO chatapp, imp_user;
-GRANT EXECUTE ON OBJECT::[social].[usp_GetUserByUsername] TO chatapp, imp_user;
-GRANT EXECUTE ON OBJECT::[social].[usp_AuthenticateUser] TO chatapp, imp_user;
-GRANT EXECUTE ON OBJECT::[social].[usp_CreateUser] TO chatapp, imp_user;
-GRANT EXECUTE ON OBJECT::[social].[usp_CreateGroup] TO chatapp, imp_user;
-GRANT EXECUTE ON OBJECT::[social].[usp_AddMember] TO chatapp, imp_user;
-GRANT EXECUTE ON OBJECT::[io].[usp_GetLastNGroupMessages] TO chatapp, imp_user;
-GRANT EXECUTE ON OBJECT::[io].[usp_SendGroupMessage] TO chatapp, imp_user;
+GRANT EXECUTE ON OBJECT::[social].[usp_GetAllUsers] TO chatapp;
+GRANT EXECUTE ON OBJECT::[social].[usp_GetUserByUsername] TO chatapp;
+GRANT EXECUTE ON OBJECT::[social].[usp_AuthenticateUser] TO chatapp;
+GRANT EXECUTE ON OBJECT::[social].[usp_CreateUser] TO chatapp;
+GRANT EXECUTE ON OBJECT::[social].[usp_CreateGroup] TO chatapp;
+GRANT EXECUTE ON OBJECT::[social].[usp_AddMember] TO chatapp;
+GRANT EXECUTE ON OBJECT::[io].[usp_GetLastNGroupMessages] TO chatapp;
+GRANT EXECUTE ON OBJECT::[io].[usp_SendGroupMessage] TO chatapp;
 GO
-
-/* DATABASE AUDITS */
-CREATE DATABASE AUDIT SPECIFICATION Audit_DataReading FOR SERVER AUDIT My_Audit; GO
-ALTER DATABASE AUDIT SPECIFICATION Audit_DataReading FOR SERVER AUDIT My_Audit
-    ADD (SELECT ON [social].[User] BY chatapp, dbo),
-    ADD (SELECT ON [social].[Group] BY chatapp, dbo),
-    ADD (SELECT ON [social].[Member] BY chatapp, dbo),
-    ADD (SELECT ON [io].[GroupMessage] BY chatapp, dbo)
-    WITH (STATE = ON); GO
-
-CREATE DATABASE AUDIT SPECIFICATION Audit_DataManipulation FOR SERVER AUDIT My_Audit2; GO
-ALTER DATABASE AUDIT SPECIFICATION Audit_DataManipulation FOR SERVER AUDIT My_Audit2
-    ADD (INSERT, UPDATE ON [social].[User] BY chatapp, dbo),
-    ADD (INSERT, UPDATE ON [social].[Group] BY chatapp, dbo),
-    ADD (INSERT, UPDATE ON [social].[Member] BY chatapp, dbo),
-    ADD (INSERT, UPDATE ON [io].[GroupMessage] BY chatapp, dbo)
-        WITH (STATE = ON); GO
 
 
 /* INSERT DATA */
@@ -393,7 +341,3 @@ EXEC [io].[usp_SendGroupMessage] @authorId = 2, @groupId = 1, @content = N'Secon
 EXEC [io].[usp_SendGroupMessage] @authorId = 3, @groupId = 2, @content = N'Third message ever, first in Primm'; GO
 EXEC [io].[usp_SendGroupMessage] @authorId = 2, @groupId = 1, @content = N'Third message in Goodsprings'; GO
 EXEC [io].[usp_SendGroupMessage] @authorId = 3, @groupId = 1, @content = N'Fourth message in Goodsprings'; GO
-EXEC [io].[usp_SendGroupMessage] @authorId = 1, @groupId = 1, @content = N'After the first full backup!'; GO
-EXEC [io].[usp_SendGroupMessage] @authorId = 1, @groupId = 1, @content = N'After the first differential backup!'; GO
-EXEC [io].[usp_SendGroupMessage] @authorId = 1, @groupId = 1, @content = N'After the first transaction log backup!'; GO
-EXEC [io].[usp_SendGroupMessage] @authorId = 1, @groupId = 1, @content = N'After the second transaction log backup!'; GO
