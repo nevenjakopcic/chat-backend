@@ -4,10 +4,12 @@ USE [master];
 
 /* DUMMY USER */
 
-CREATE LOGIN [dummy] WITH PASSWORD=N'dummy', DEFAULT_DATABASE=[tempdb]; GO
+CREATE LOGIN [dummy] WITH PASSWORD=N'dummy', DEFAULT_DATABASE=[chatdb]; GO
 DENY VIEW ANY DATABASE TO [dummy]; GO
 
 USE [chatdb];
+
+CREATE USER [dummy] FOR LOGIN [dummy]; GO
 
 /* SCHEMAS */
 

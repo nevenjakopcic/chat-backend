@@ -13,19 +13,10 @@ public class DatabaseConfig {
 
     private final DataSource dataSource;
 
-/*
     @Bean
     public JdbcTemplate jdbcTemplate() {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         jdbcTemplate.execute("EXEC sp_setapprole 'chatapp', 'chatapp'");
-        return jdbcTemplate;
-    }
-*/
-
-    @Bean
-    public JdbcTemplate jdbcTemplate() {
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-        jdbcTemplate.execute("EXECUTE AS USER = 'imp_user'");
         return jdbcTemplate;
     }
 }
