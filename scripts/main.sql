@@ -247,6 +247,12 @@ GO
 
 -- GROUP
 
+CREATE PROCEDURE [social].[usp_GetAllGroups] AS
+BEGIN
+    SELECT id, name, createdAt, lastActivity FROM [social].[Group];
+END
+GO
+
 CREATE PROCEDURE [social].[usp_CreateGroup] (@name AS VARCHAR(20)) AS
 BEGIN
     INSERT INTO [social].[Group] (name, createdAt, lastActivity)
@@ -269,7 +275,7 @@ GO
 
 CREATE PROCEDURE [io].[usp_GetLastNGroupMessages] (@groupId AS INT, @n AS INT) AS
 BEGIN
-    SELECT TOP(@n) id, authorId, groupId, content, createdAt FROM GroupMessage WHERE groupId = @groupId ORDER BY id DESC;
+    SELECT TOP(@n) id, authorId, groupId, content, createdAt FROM [io].[GroupMessage] WHERE groupId = @groupId ORDER BY id DESC;
 END
 GO
 
@@ -300,6 +306,7 @@ GRANT EXECUTE ON OBJECT::[social].[usp_GetAllUsers] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_GetUserByUsername] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_AuthenticateUser] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_CreateUser] TO chatapp;
+GRANT EXECUTE ON OBJECT::[social].[usp_GetAllGroups] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_CreateGroup] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_AddMember] TO chatapp;
 GRANT EXECUTE ON OBJECT::[io].[usp_GetLastNGroupMessages] TO chatapp;
