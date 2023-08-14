@@ -8,12 +8,13 @@ import lombok.NoArgsConstructor;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class GroupDto implements Serializable {
+public class GroupWithMembersDto implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -689824610303334217L;
@@ -22,4 +23,5 @@ public class GroupDto implements Serializable {
     private String name;
     private LocalDateTime createdAt;
     private LocalDateTime lastActivity;
+    private List<MemberDto> members;
 }

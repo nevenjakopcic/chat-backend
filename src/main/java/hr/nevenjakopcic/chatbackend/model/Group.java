@@ -7,12 +7,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "Group")
+@Table(name = "Group", schema = "social")
 @Entity(name = "Group")
 public class Group {
 
@@ -29,4 +30,7 @@ public class Group {
 
     @Column(name = "lastActivity", nullable = false)
     private LocalDateTime lastActivity;
+
+    @OneToMany(mappedBy = "memberId.group")
+    private List<Member> members;
 }

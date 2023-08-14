@@ -1,6 +1,6 @@
 package hr.nevenjakopcic.chatbackend.service;
 
-import hr.nevenjakopcic.chatbackend.dto.response.GroupDto;
+import hr.nevenjakopcic.chatbackend.dto.response.GroupWithMembersDto;
 import hr.nevenjakopcic.chatbackend.mapper.GroupDtoMapper;
 import hr.nevenjakopcic.chatbackend.repository.GroupRepository;
 import lombok.AllArgsConstructor;
@@ -17,7 +17,7 @@ public class GroupService {
     private final GroupRepository groupRepository;
 
     @Transactional(readOnly = true)
-    public List<GroupDto> getAll() {
+    public List<GroupWithMembersDto> getAll() {
         return groupRepository.getAll().stream()
                                       .map(GroupDtoMapper::map)
                                       .collect(Collectors.toList());

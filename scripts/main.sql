@@ -292,9 +292,8 @@ GO
 CREATE APPLICATION ROLE chatapp WITH PASSWORD = 'chatapp'; GO
 
 -- TABLE (AND COLUMN) PERMISSIONS
-GRANT SELECT ON [social].[User] (username, email, lastOnline, joinedAt) TO chatapp;
-DENY SELECT ON [social].[User] (password) TO chatapp;
-DENY DELETE ON [social].[User] TO chatapp;
+GRANT SELECT ON [social].[User] (id, username, email, lastOnline, joinedAt) TO chatapp;
+GRANT SELECT ON [social].[Member] TO chatapp;
 GO
 
 GRANT SELECT, INSERT ON [io].[GroupMessage] TO chatapp;
@@ -318,8 +317,8 @@ GO
 
 INSERT [enum].[MemberRole] ([role])
 VALUES
-    ('ADMIN'),
-    ('MEMBER')
+    ('ROLE_ADMIN'),
+    ('ROLE_MEMBER')
 GO
 
 INSERT [enum].[RelationshipStatus] ([status])
