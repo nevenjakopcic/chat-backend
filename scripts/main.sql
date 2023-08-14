@@ -247,12 +247,6 @@ GO
 
 -- GROUP
 
-CREATE PROCEDURE [social].[usp_GetAllGroups] AS
-BEGIN
-    SELECT id, name, createdAt, lastActivity FROM [social].[Group];
-END
-GO
-
 CREATE PROCEDURE [social].[usp_CreateGroup] (@name AS VARCHAR(20)) AS
 BEGIN
     INSERT INTO [social].[Group] (name, createdAt, lastActivity)
@@ -293,7 +287,8 @@ CREATE APPLICATION ROLE chatapp WITH PASSWORD = 'chatapp'; GO
 
 -- TABLE (AND COLUMN) PERMISSIONS
 GRANT SELECT ON [social].[User] (id, username, email, lastOnline, joinedAt) TO chatapp;
-GRANT SELECT ON [social].[Member] TO chatapp;
+GRANT SELECT ON [social].[Group] (id, name, createdAt, lastActivity) TO chatapp;
+GRANT SELECT ON [social].[Member] (groupId, userId, roleId, joinedAt) TO chatapp;
 GO
 
 GRANT SELECT, INSERT ON [io].[GroupMessage] TO chatapp;
@@ -305,7 +300,6 @@ GRANT EXECUTE ON OBJECT::[social].[usp_GetAllUsers] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_GetUserByUsername] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_AuthenticateUser] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_CreateUser] TO chatapp;
-GRANT EXECUTE ON OBJECT::[social].[usp_GetAllGroups] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_CreateGroup] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_AddMember] TO chatapp;
 GRANT EXECUTE ON OBJECT::[io].[usp_GetLastNGroupMessages] TO chatapp;

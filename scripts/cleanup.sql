@@ -14,7 +14,6 @@ DROP PROCEDURE IF EXISTS [social].[usp_GetAllUsers]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_GetUserByUsername]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_AuthenticateUser]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_CreateUser]; GO
-DROP PROCEDURE IF EXISTS [social].[usp_GetAllGroups]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_CreateGroup]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_AddMember]; GO
 DROP PROCEDURE IF EXISTS [io].[usp_GetLastNGroupMessages]; GO

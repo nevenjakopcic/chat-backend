@@ -18,7 +18,7 @@ public class GroupService {
 
     @Transactional(readOnly = true)
     public List<GroupWithMembersDto> getAll() {
-        return groupRepository.getAll().stream()
+        return groupRepository.findAll().stream()
                                       .map(GroupDtoMapper::map)
                                       .collect(Collectors.toList());
     }

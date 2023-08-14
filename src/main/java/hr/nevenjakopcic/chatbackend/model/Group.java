@@ -13,7 +13,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "Group", schema = "social")
+@Table(name = "`Group`", schema = "social")
 @Entity(name = "Group")
 public class Group {
 
