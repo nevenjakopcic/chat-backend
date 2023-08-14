@@ -5,7 +5,7 @@ import hr.nevenjakopcic.chatbackend.model.Group;
 
 import java.util.stream.Collectors;
 
-public class GroupDtoMapper {
+public class GroupWithMembersDtoMapper {
 
     public static GroupWithMembersDto map(Group source) {
         return GroupWithMembersDto.builder()
@@ -20,5 +20,5 @@ public class GroupDtoMapper {
                 .build();
     }
 
-    private GroupDtoMapper() {}
+    private GroupWithMembersDtoMapper() {}
 }

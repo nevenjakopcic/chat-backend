@@ -5,10 +5,7 @@ import hr.nevenjakopcic.chatbackend.service.GroupService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/group")
@@ -19,7 +16,12 @@ public class GroupController {
     private final GroupService groupService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse> getAllGroups() {
-        return new ResponseEntity<>(new ApiResponse(groupService.getAll()), HttpStatus.OK);
+    public ResponseEntity<ApiResponse> getAllGroupsInfoAndMembers() {
+        return new ResponseEntity<>(new ApiResponse(groupService.getAllGroupsAndMembers()), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse> getGroupInfoAndMembers(@PathVariable Long id) {
+        return new ResponseEntity<>(new ApiResponse(groupService.getGroupAndMembers(id)), HttpStatus.OK);
     }
 }
