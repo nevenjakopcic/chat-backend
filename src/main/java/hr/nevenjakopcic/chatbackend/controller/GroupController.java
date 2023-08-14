@@ -16,8 +16,8 @@ public class GroupController {
     private final GroupService groupService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse> getAllGroupsInfoAndMembers() {
-        return new ResponseEntity<>(new ApiResponse(groupService.getAllGroupsAndMembers()), HttpStatus.OK);
+    public ResponseEntity<ApiResponse> getAllGroupsInfo() {
+        return new ResponseEntity<>(new ApiResponse(groupService.getAllGroups()), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")

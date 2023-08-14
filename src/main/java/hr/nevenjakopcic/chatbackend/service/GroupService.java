@@ -1,7 +1,9 @@
 package hr.nevenjakopcic.chatbackend.service;
 
+import hr.nevenjakopcic.chatbackend.dto.response.GroupDto;
 import hr.nevenjakopcic.chatbackend.dto.response.GroupWithMembersDto;
 import hr.nevenjakopcic.chatbackend.exception.NotFoundException;
+import hr.nevenjakopcic.chatbackend.mapper.GroupDtoMapper;
 import hr.nevenjakopcic.chatbackend.mapper.GroupWithMembersDtoMapper;
 import hr.nevenjakopcic.chatbackend.model.Group;
 import hr.nevenjakopcic.chatbackend.repository.GroupRepository;
@@ -19,10 +21,10 @@ public class GroupService {
     private final GroupRepository groupRepository;
 
     @Transactional(readOnly = true)
-    public List<GroupWithMembersDto> getAllGroupsAndMembers() {
+    public List<GroupDto> getAllGroups() {
         return groupRepository.findAll().stream()
-                                      .map(GroupWithMembersDtoMapper::map)
-                                      .collect(Collectors.toList());
+                .map(GroupDtoMapper::map)
+                .collect(Collectors.toList());
     }
 
     public GroupWithMembersDto getGroupAndMembers(Long groupId) {
