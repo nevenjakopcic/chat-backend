@@ -24,4 +24,9 @@ public class GroupController {
     public ResponseEntity<ApiResponse> getGroupInfoAndMembers(@PathVariable Long id) {
         return new ResponseEntity<>(new ApiResponse(groupService.getGroupAndMembers(id)), HttpStatus.OK);
     }
+
+    @GetMapping("/{id}/last/{n}")
+    public ResponseEntity<ApiResponse> getLastNGroupMessages(@PathVariable final Long id, @PathVariable final Long n) {
+        return new ResponseEntity<>(new ApiResponse(groupService.getLastNGroupMessages(id, n)), HttpStatus.OK);
+    }
 }
