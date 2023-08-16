@@ -1,10 +1,8 @@
 /* CLEANUP */
 USE chatdb;
 
-DROP USER dummy;
-DROP LOGIN dummy;
-
-DROP APPLICATION ROLE chatapp; GO
+DROP USER chatapp; GO
+DROP LOGIN chatapp; GO
 
 DROP SYMMETRIC KEY MySymmetricKey; GO
 DROP ASYMMETRIC KEY MyAsymmetricKey; GO

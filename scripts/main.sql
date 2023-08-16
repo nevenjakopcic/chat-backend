@@ -2,14 +2,13 @@
 
 USE [master];
 
-/* DUMMY USER */
+/* LOGIN AND USER */
 
-CREATE LOGIN [dummy] WITH PASSWORD=N'dummy', DEFAULT_DATABASE=[chatdb]; GO
-DENY VIEW ANY DATABASE TO [dummy]; GO
+CREATE LOGIN [chatapp] WITH PASSWORD=N'chatapp', DEFAULT_DATABASE=[chatdb]; GO
 
 USE [chatdb];
 
-CREATE USER [dummy] FOR LOGIN [dummy]; GO
+CREATE USER [chatapp] FOR LOGIN [chatapp]; GO
 
 /* SCHEMAS */
 
@@ -281,13 +280,11 @@ END
 GO
 
 
-/* APPLICATION ROLE AND PERMISSIONS */
-
-CREATE APPLICATION ROLE chatapp WITH PASSWORD = 'chatapp'; GO
+/* PERMISSIONS */
 
 -- TABLE (AND COLUMN) PERMISSIONS
 GRANT SELECT ON [social].[User] (id, username, email, lastOnline, joinedAt) TO chatapp;
-GRANT SELECT ON [social].[Group] (id, name, createdAt, lastActivity) TO chatapp;
+GRANT SELECT ON [social].[Group] TO chatapp;
 GRANT SELECT ON [social].[Member] (groupId, userId, roleId, joinedAt) TO chatapp;
 GO
 
@@ -343,3 +340,17 @@ EXEC [io].[usp_SendGroupMessage] @authorId = 2, @groupId = 1, @content = N'Secon
 EXEC [io].[usp_SendGroupMessage] @authorId = 3, @groupId = 2, @content = N'Third message ever, first in Primm'; GO
 EXEC [io].[usp_SendGroupMessage] @authorId = 2, @groupId = 1, @content = N'Third message in Goodsprings'; GO
 EXEC [io].[usp_SendGroupMessage] @authorId = 3, @groupId = 1, @content = N'Fourth message in Goodsprings'; GO
+EXEC [io].[usp_SendGroupMessage] @authorId = 1, @groupId = 1, @content = N'This is a short message'; GO
+EXEC [io].[usp_SendGroupMessage] @authorId = 1, @groupId = 1, @content = N'Lorem ipsum dolor sit amet,
+    consectetur adipiscing elit. Duis at massa ac nisl condimentum scelerisque. Phasellus semper lorem velit,
+    eget pharetra neque tristique commodo. Sed consequat orci a semper placerat. Suspendisse in erat egestas,
+    porta nisl ut, bibendum arcu. Quisque lacinia dapibus maximus. Mauris tempus mauris eget velit mattis ornare.
+    Aenean non consectetur tellus, vitae volutpat ligula. Vivamus a vulputate orci, id posuere est.
+    Cras commodo convallis urna, eu imperdiet velit iaculis sed. In accumsan cursus mollis.
+    Duis sit amet orci blandit, imperdiet dolor eget, iaculis ex. Quisque et lorem vel lacus dictum aliquet et
+    at lectus. Aliquam erat volutpat. In vitae orci feugiat, congue diam eget, ullamcorper neque.
+    Curabitur suscipit et diam sed posuere. Curabitur libero lacus, ultricies ut ultrices sed, sodales at libero.
+    Aliquam a metus vitae augue elementum tincidunt. Sed egestas volutpat lacus, id consequat orci posuere eget.
+    Fusce vehicula quam efficitur fringilla ullamcorper.'; GO
+EXEC [io].[usp_SendGroupMessage] @authorId = 1, @groupId = 1, @content = N'I wonder how that lorem will render...'; GO
+EXEC [io].[usp_SendGroupMessage] @authorId = 2, @groupId = 1, @content = N'Hello!'; GO

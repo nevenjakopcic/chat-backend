@@ -2,8 +2,8 @@ spring:
   datasource:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
     url: jdbc:sqlserver://localhost\MSSQLSERVER;database=chatdb;encrypt=true;trustServerCertificate=true;
-    username: dummy
-    password: dummy
+    username: chatapp
+    password: chatapp
   jpa:
     hibernate:
       ddl-auto: none
