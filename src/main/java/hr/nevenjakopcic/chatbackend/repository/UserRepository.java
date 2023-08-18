@@ -14,6 +14,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Procedure(procedureName = "social.usp_GetAllUsers")
     List<User> getAll();
 
-    @Procedure(procedureName = "social.usp_GetUserByUsername")
-    Optional<User> getByUsername(String username);
+    Optional<User> findByUsername(String username);
+
+    @Procedure(procedureName = "social.usp_CreateUser")
+    void createUser(String username, String password, String email);
 }

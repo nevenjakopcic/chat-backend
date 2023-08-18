@@ -21,7 +21,7 @@ CREATE SCHEMA io; GO
 CREATE TABLE [social].[User](
 	[id] INT PRIMARY KEY IDENTITY(1, 1),
 	[username] VARCHAR(20) NOT NULL,
-	[password] VARBINARY(4000) NOT NULL,
+	[password] VARCHAR(100) NOT NULL,
 	[email] VARCHAR(50) NOT NULL,
 	[lastOnline] DATETIME NOT NULL,
 	[joinedAt] DATETIME NOT NULL
@@ -171,32 +171,6 @@ END
 GO
 
 
-/* ENCRYPTION */
-
-CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'MasterKeyPass'; GO
-
-CREATE ASYMMETRIC KEY MyAsymmetricKey WITH ALGORITHM = RSA_2048; GO
-
-CREATE SYMMETRIC KEY MySymmetricKey WITH ALGORITHM = AES_256
-ENCRYPTION BY ASYMMETRIC KEY MyAsymmetricKey; GO
-
-
-/* FUNCTIONS */
-
-CREATE FUNCTION [social].[fn_Compare] (@first VARCHAR(MAX), @second VARCHAR(MAX)) RETURNS BIT AS
-BEGIN
-    DECLARE @result BIT;
-
-    IF @first = @second
-        SET @result = 1;
-    ELSE
-        SET @result = 0;
-
-    RETURN @result;
-END
-GO
-
-
 /* STORED PROCEDURES */
 
 -- USER
@@ -205,42 +179,12 @@ CREATE PROCEDURE [social].[usp_GetAllUsers] AS
 	SELECT id, username, email, lastOnline, joinedAt FROM [social].[User];
 GO
 
-CREATE PROCEDURE [social].[usp_GetUserByUsername] (@username AS VARCHAR(20)) AS
-BEGIN
-	SELECT id, username, email, lastOnline, joinedAt FROM [social].[User] WHERE username = @username;
-END
-GO
-
-CREATE PROCEDURE [social].[usp_AuthenticateUser] (@username AS VARCHAR(20),
-                                                  @password AS VARCHAR(50)) AS
-BEGIN
-    -- get the actual encrypted password
-    DECLARE @actualEncrypted VARBINARY(4000) = (SELECT password FROM [social].[User] WHERE username = @username)
-
-    -- decrypt it
-    OPEN SYMMETRIC KEY MySymmetricKey
-    DECRYPTION BY ASYMMETRIC KEY MyAsymmetricKey;
-
-    DECLARE @actual VARCHAR(50) = (SELECT CONVERT(VARCHAR(50), DECRYPTBYKEY(@actualEncrypted)))
-
-    CLOSE SYMMETRIC KEY MySymmetricKey;
-
-    -- compare to the given password
-    SELECT([social].[fn_Compare](@password, @actual));
-END
-GO
-
 CREATE PROCEDURE [social].[usp_CreateUser] (@username AS VARCHAR(20),
-                                            @password AS VARCHAR(50),
+                                            @password AS VARCHAR(100),
                                             @email AS VARCHAR(50)) AS
 BEGIN
-    OPEN SYMMETRIC KEY MySymmetricKey
-    DECRYPTION BY ASYMMETRIC KEY MyAsymmetricKey;
-
     INSERT INTO [social].[User] (username, password, email, lastOnline, joinedAt)
-    VALUES (@username, ENCRYPTBYKEY(KEY_GUID('MySymmetricKey'), @password), @email, GETDATE(), GETDATE());
-
-    CLOSE SYMMETRIC KEY MySymmetricKey;
+    VALUES (@username, @password, @email, GETDATE(), GETDATE());
 END
 GO
 
@@ -283,9 +227,9 @@ GO
 /* PERMISSIONS */
 
 -- TABLE (AND COLUMN) PERMISSIONS
-GRANT SELECT ON [social].[User] (id, username, email, lastOnline, joinedAt) TO chatapp;
+GRANT SELECT ON [social].[User] TO chatapp;
 GRANT SELECT ON [social].[Group] TO chatapp;
-GRANT SELECT ON [social].[Member] (groupId, userId, roleId, joinedAt) TO chatapp;
+GRANT SELECT ON [social].[Member] TO chatapp;
 GO
 
 GRANT SELECT, INSERT ON [io].[GroupMessage] TO chatapp;
@@ -294,8 +238,6 @@ GO
 
 -- EXECUTE STORED PROCEDURES PERMISSIONS
 GRANT EXECUTE ON OBJECT::[social].[usp_GetAllUsers] TO chatapp;
-GRANT EXECUTE ON OBJECT::[social].[usp_GetUserByUsername] TO chatapp;
-GRANT EXECUTE ON OBJECT::[social].[usp_AuthenticateUser] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_CreateUser] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_CreateGroup] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_AddMember] TO chatapp;
