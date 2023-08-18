@@ -13,4 +13,11 @@ public class LoginDtoMapper {
     }
 
     private LoginDtoMapper() {}
+
+    public static LoginDto map(User source, String token) {
+        LoginDto dto = map(source);
+        dto.setToken(token);
+
+        return dto;
+    }
 }

@@ -8,7 +8,6 @@ import hr.nevenjakopcic.chatbackend.model.User;
 import hr.nevenjakopcic.chatbackend.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -61,9 +60,7 @@ public class AuthController {
 
             String token = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
 
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.AUTHORIZATION, token)
-                    .body(new ApiResponse(LoginDtoMapper.map(user)));
+            return new ResponseEntity<>(new ApiResponse(LoginDtoMapper.map(user, token)), HttpStatus.OK);
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
