@@ -3,6 +3,7 @@ package hr.nevenjakopcic.chatbackend.service;
 import hr.nevenjakopcic.chatbackend.dto.response.GroupDto;
 import hr.nevenjakopcic.chatbackend.dto.response.GroupMessageDto;
 import hr.nevenjakopcic.chatbackend.dto.response.GroupWithMembersDto;
+import hr.nevenjakopcic.chatbackend.dto.websocket.IncomingMessage;
 import hr.nevenjakopcic.chatbackend.exception.NotFoundException;
 import hr.nevenjakopcic.chatbackend.mapper.GroupDtoMapper;
 import hr.nevenjakopcic.chatbackend.mapper.GroupMessageDtoMapper;
@@ -44,5 +45,15 @@ public class GroupService {
         return messageRepository.getLastNGroupMessages(groupId, n).stream()
                 .map(GroupMessageDtoMapper::map)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public GroupMessageDto sendGroupMessage(Long groupId, IncomingMessage message) {
+        messageRepository.sendGroupMessage(
+                message.getAuthorId(),
+                groupId,
+                message.getContent());
+
+        return getLastNGroupMessages(groupId, 1L).get(0);
     }
 }

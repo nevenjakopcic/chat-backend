@@ -264,9 +264,18 @@ VALUES
     ('block_both')
 GO
 
-EXEC [social].[usp_CreateUser] @username = 'LuckyLuke', @password = 'password', @email = 'luckyluke@mail.com'; GO
-EXEC [social].[usp_CreateUser] @username = 'JollyJumper', @password = 'password', @email = 'jollyjumper@mail.com'; GO
-EXEC [social].[usp_CreateUser] @username = 'Rantanplan', @password = 'password', @email = 'rantanplan@mail.com'; GO
+EXEC [social].[usp_CreateUser]
+    @username = 'LuckyLuke',
+    @password = '$2a$10$slRHinySi9/4ZIyhtKtwJ.MT0zqjRLwIVghqQC0rg5NYAktKa9fK.',
+    @email = 'luckyluke@mail.com'; GO
+EXEC [social].[usp_CreateUser]
+    @username = 'JollyJumper',
+    @password = '$2a$10$IVEs5.NToJV7rLFhIIs.6udG4KjuOK7x5qPMXKUv7iTXiVNno1SpK',
+    @email = 'jollyjumper@mail.com'; GO
+EXEC [social].[usp_CreateUser]
+    @username = 'Rantanplan',
+    @password = '$2a$10$9YforYi5MKMDKUd3DiKhX.7Um4M4.cEw7RoYQe9ZPkiWYDskWEhqK',
+    @email = 'rantanplan@mail.com'; GO
 
 EXEC [social].[usp_CreateGroup] @name = 'Goodsprings'; GO
 EXEC [social].[usp_CreateGroup] @name = 'Primm'; GO

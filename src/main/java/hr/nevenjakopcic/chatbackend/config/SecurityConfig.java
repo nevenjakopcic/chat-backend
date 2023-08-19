@@ -66,6 +66,9 @@ public class SecurityConfig {
                 // Browser CORS policy workaround
                 .requestMatchers(HttpMethod.OPTIONS, "/**")
                 .permitAll()
+                // Stomp connection endpoint
+                .requestMatchers(HttpMethod.GET, "/chat")
+                .permitAll()
                 // Public endpoints
                 .requestMatchers("/api/public/**")
                 .permitAll()

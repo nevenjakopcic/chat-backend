@@ -12,4 +12,7 @@ public interface GroupMessageRepository extends JpaRepository<GroupMessage, Long
 
     @Procedure(procedureName = "io.usp_GetLastNGroupMessages")
     List<GroupMessage> getLastNGroupMessages(Long groupId, Long n);
+
+    @Procedure(procedureName = "io.usp_SendGroupMessage")
+    void sendGroupMessage(Long authorId, Long groupId, String content);
 }
