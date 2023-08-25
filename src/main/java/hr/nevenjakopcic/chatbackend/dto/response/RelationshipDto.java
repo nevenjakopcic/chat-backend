@@ -16,10 +16,9 @@ import java.time.LocalDateTime;
 public class RelationshipDto implements Serializable {
 
     @Serial
-    private static final long serialVersionUID = 71147003125862205L;
+    private static final long serialVersionUID = -4959840925228112117L;
 
-    private Long user1Id;
-    private Long user2Id;
+    private UserDto otherUser;
     private String status;
     private LocalDateTime lastUpdatedAt;
 }

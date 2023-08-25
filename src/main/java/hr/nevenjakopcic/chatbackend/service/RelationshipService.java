@@ -14,12 +14,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RelationshipService {
 
+    private final CurrentUserService currentUserService;
     private final RelationshipRepository relationshipRepository;
 
     @Transactional(readOnly = true)
     public List<RelationshipDto> getAllRelationshipsOfUser(Long userId) {
         return relationshipRepository.getAllRelationshipsOfUser(userId).stream()
-                .map(RelationshipDtoMapper::map)
+                .map(r -> RelationshipDtoMapper.map(r, currentUserService.getCurrentUserId()))
                 .collect(Collectors.toList());
     }
 

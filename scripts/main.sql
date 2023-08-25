@@ -217,7 +217,7 @@ GO
 
 CREATE PROCEDURE [social].[usp_AddMember] (@groupId AS INT, @userId AS INT) AS
 BEGIN
-    DECLARE @userRoleId INT = (SELECT id FROM [enum].[MemberRole] WHERE role = 'MEMBER')
+    DECLARE @userRoleId INT = (SELECT id FROM [enum].[MemberRole] WHERE role = 'ROLE_MEMBER')
 
     INSERT INTO [social].[Member] (groupId, userId, roleId, joinedAt)
     VALUES (@groupId, @userId, @userRoleId, GETDATE());
