@@ -37,4 +37,9 @@ public class RelationshipService {
     public void rejectFriendRequest(Long rejectorId, Long requesterId) {
         relationshipRepository.rejectFriendRequest(rejectorId, requesterId);
     }
+
+    @Transactional
+    public void removeFromFriends(Long removerId, Long friendId) {
+        relationshipRepository.removeFromFriends(removerId, friendId);
+    }
 }

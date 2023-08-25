@@ -49,4 +49,13 @@ public class RelationshipController {
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+    @DeleteMapping("/friend/{friendId}")
+    public ResponseEntity<ApiResponse> removeFromFriends(@PathVariable final Long friendId) {
+        Long currentUserId = currentUserService.getCurrentUserId();
+
+        relationshipService.removeFromFriends(currentUserId, friendId);
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }
