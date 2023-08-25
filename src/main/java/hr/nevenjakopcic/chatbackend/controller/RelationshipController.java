@@ -1,12 +1,12 @@
 package hr.nevenjakopcic.chatbackend.controller;
 
 import hr.nevenjakopcic.chatbackend.dto.ApiResponse;
+import hr.nevenjakopcic.chatbackend.service.CurrentUserService;
 import hr.nevenjakopcic.chatbackend.service.RelationshipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,9 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class RelationshipController {
 
     private final RelationshipService relationshipService;
+    private final CurrentUserService currentUserService;
 
-    @GetMapping("/user/{id}")
-    public ResponseEntity<ApiResponse> getAllRelationshipsOfUser(@PathVariable final Long id){
-        return new ResponseEntity<>(new ApiResponse(relationshipService.getAllRelationshipsOfUser(id)), HttpStatus.OK);
+    @GetMapping("/user")
+    public ResponseEntity<ApiResponse> getAllRelationshipsOfCurrentUser() {
+        Long currentUserId = currentUserService.getCurrentUserId();
+
+        return new ResponseEntity<>(new ApiResponse(relationshipService.getAllRelationshipsOfUser(currentUserId)), HttpStatus.OK);
     }
 }
