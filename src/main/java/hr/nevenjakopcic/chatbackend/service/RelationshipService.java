@@ -22,4 +22,9 @@ public class RelationshipService {
                 .map(RelationshipDtoMapper::map)
                 .collect(Collectors.toList());
     }
+
+    @Transactional
+    public void sendFriendRequest(Long requesterId, Long targetId) {
+        relationshipRepository.sendFriendRequest(requesterId, targetId);
+    }
 }

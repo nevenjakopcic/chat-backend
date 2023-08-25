@@ -11,4 +11,7 @@ public interface RelationshipRepository extends JpaRepository<Relationship, Rela
 
     @Procedure(procedureName = "social.usp_GetAllRelationshipsOfUser")
     List<Relationship> getAllRelationshipsOfUser(Long userId);
+
+    @Procedure(procedureName = "social.usp_SendFriendRequest")
+    void sendFriendRequest(Long requesterId, Long targetId);
 }

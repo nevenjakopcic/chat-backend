@@ -6,9 +6,7 @@ import hr.nevenjakopcic.chatbackend.service.RelationshipService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/relationship")
@@ -23,5 +21,14 @@ public class RelationshipController {
         Long currentUserId = currentUserService.getCurrentUserId();
 
         return new ResponseEntity<>(new ApiResponse(relationshipService.getAllRelationshipsOfUser(currentUserId)), HttpStatus.OK);
+    }
+
+    @PostMapping("/friend-request/{targetUserId}")
+    public ResponseEntity<ApiResponse> sendFriendRequest(@PathVariable final Long targetUserId) {
+        Long currentUserId = currentUserService.getCurrentUserId();
+
+        relationshipService.sendFriendRequest(currentUserId, targetUserId);
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
