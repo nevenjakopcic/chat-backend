@@ -32,4 +32,9 @@ public class RelationshipService {
     public void acceptFriendRequest(Long acceptorId, Long requesterId) {
         relationshipRepository.acceptFriendRequest(acceptorId, requesterId);
     }
+
+    @Transactional
+    public void rejectFriendRequest(Long rejectorId, Long requesterId) {
+        relationshipRepository.rejectFriendRequest(rejectorId, requesterId);
+    }
 }

@@ -40,4 +40,13 @@ public class RelationshipController {
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+    @DeleteMapping("/friend-request/reject/{requesterId}")
+    public ResponseEntity<ApiResponse> rejectFriendRequest(@PathVariable final Long requesterId) {
+        Long currentUserId = currentUserService.getCurrentUserId();
+
+        relationshipService.rejectFriendRequest(currentUserId, requesterId);
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }
