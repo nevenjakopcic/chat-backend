@@ -21,6 +21,9 @@ public interface RelationshipRepository extends JpaRepository<Relationship, Rela
     @Procedure(procedureName = "social.usp_RejectFriendRequest")
     void rejectFriendRequest(Long rejectorId, Long requesterId);
 
+    @Procedure(procedureName = "social.usp_CancelFriendRequest")
+    void cancelFriendRequest(Long cancellerId, Long targetId);
+
     @Procedure(procedureName = "social.usp_RemoveFromFriends")
     void removeFromFriends(Long removerId, Long friendId);
 }

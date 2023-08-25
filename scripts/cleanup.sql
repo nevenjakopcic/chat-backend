@@ -14,6 +14,7 @@ DROP PROCEDURE IF EXISTS [social].[usp_GetAllRelationshipsOfUser]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_SendFriendRequest]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_AcceptFriendRequest]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_RejectFriendRequest]; GO
+DROP PROCEDURE IF EXISTS [social].[usp_CancelFriendRequest]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_RemoveFromFriends]; GO
 
 DROP TABLE IF EXISTS [io].[GroupMessageAttachment]; GO

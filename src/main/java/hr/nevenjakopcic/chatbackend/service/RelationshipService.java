@@ -40,6 +40,11 @@ public class RelationshipService {
     }
 
     @Transactional
+    public void cancelFriendRequest(Long cancellerId, Long targetId) {
+        relationshipRepository.cancelFriendRequest(cancellerId, targetId);
+    }
+
+    @Transactional
     public void removeFromFriends(Long removerId, Long friendId) {
         relationshipRepository.removeFromFriends(removerId, friendId);
     }

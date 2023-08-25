@@ -50,6 +50,15 @@ public class RelationshipController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @DeleteMapping("/friend-request/cancel/{targetId}")
+    public ResponseEntity<ApiResponse> cancelFriendRequest(@PathVariable final Long targetId) {
+        Long currentUserId = currentUserService.getCurrentUserId();
+
+        relationshipService.cancelFriendRequest(currentUserId, targetId);
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
     @DeleteMapping("/friend/{friendId}")
     public ResponseEntity<ApiResponse> removeFromFriends(@PathVariable final Long friendId) {
         Long currentUserId = currentUserService.getCurrentUserId();

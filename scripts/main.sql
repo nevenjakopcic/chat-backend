@@ -303,13 +303,32 @@ BEGIN
         BEGIN
             SET @prevStatusId = (SELECT id FROM [enum].[RelationshipStatus] WHERE status = 'pending_second_first');
             DELETE FROM [social].[Relationship]
-            WHERE user1Id = @rejectorId AND user2Id = @requesterId AND statusId = @prevStatusId;
+                WHERE user1Id = @rejectorId AND user2Id = @requesterId AND statusId = @prevStatusId;
         END
     ELSE
         BEGIN
             SET @prevStatusId = (SELECT id FROM [enum].[RelationshipStatus] WHERE status = 'pending_first_second');
             DELETE FROM [social].[Relationship]
-            WHERE user1Id = @requesterId AND user2Id = @rejectorId AND statusId = @prevStatusId;
+                WHERE user1Id = @requesterId AND user2Id = @rejectorId AND statusId = @prevStatusId;
+        END
+END
+GO
+
+CREATE PROCEDURE [social].[usp_CancelFriendRequest] (@cancellerId AS INT, @targetId AS INT) AS
+BEGIN
+    DECLARE @prevStatusId INT;
+
+    IF @cancellerId < @targetId
+        BEGIN
+            SET @prevStatusId = (SELECT id FROM [enum].[RelationshipStatus] WHERE status = 'pending_first_second');
+            DELETE FROM [social].[Relationship]
+                WHERE user1Id = @cancellerId AND user2Id = @targetId AND statusId = @prevStatusId;
+        END
+    ELSE
+        BEGIN
+            SET @prevStatusId = (SELECT id FROM [enum].[RelationshipStatus] WHERE status = 'pending_second_first');
+            DELETE FROM [social].[Relationship]
+                WHERE user1Id = @targetId AND user2Id = @cancellerId AND statusId = @prevStatusId;
         END
 END
 GO
@@ -321,12 +340,12 @@ BEGIN
     IF @removerId < @friendId
         BEGIN
             DELETE FROM [social].[Relationship]
-            WHERE user1Id = @removerId AND user2Id = @friendId AND statusId = @prevStatusId;
+                WHERE user1Id = @removerId AND user2Id = @friendId AND statusId = @prevStatusId;
         END
     ELSE
         BEGIN
             DELETE FROM [social].[Relationship]
-            WHERE user1Id = @friendId AND user2Id = @removerId AND statusId = @prevStatusId;
+                WHERE user1Id = @friendId AND user2Id = @removerId AND statusId = @prevStatusId;
         END
 END
 GO
@@ -354,6 +373,7 @@ GRANT EXECUTE ON OBJECT::[social].[usp_GetAllRelationshipsOfUser] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_SendFriendRequest] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_AcceptFriendRequest] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_RejectFriendRequest] TO chatapp;
+GRANT EXECUTE ON OBJECT::[social].[usp_CancelFriendRequest] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_RemoveFromFriends] TO chatapp;
 GO
 
@@ -425,6 +445,8 @@ EXEC [social].[usp_SendFriendRequest] @requesterId = 3, @targetId = 1; GO
 EXEC [social].[usp_AcceptFriendRequest] @acceptorId = 1, @requesterId = 3; GO
 EXEC [social].[usp_AcceptFriendRequest] @acceptorId = 3, @requesterId = 2; GO
 EXEC [social].[usp_AcceptFriendRequest] @acceptorId = 2, @requesterId = 1; GO
+
+-- EXEC [social].[usp_CancelFriendRequest] @cancellerId = 1, @targetId = 2; GO
 
 -- EXEC [social].[usp_RejectFriendRequest] @rejectorId = 1, @requesterId = 3; GO
 -- EXEC [social].[usp_RejectFriendRequest] @rejectorId = 2, @requesterId = 1; GO
