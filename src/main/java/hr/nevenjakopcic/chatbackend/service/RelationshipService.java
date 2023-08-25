@@ -27,4 +27,9 @@ public class RelationshipService {
     public void sendFriendRequest(Long requesterId, Long targetId) {
         relationshipRepository.sendFriendRequest(requesterId, targetId);
     }
+
+    @Transactional
+    public void acceptFriendRequest(Long acceptorId, Long requesterId) {
+        relationshipRepository.acceptFriendRequest(acceptorId, requesterId);
+    }
 }

@@ -31,4 +31,13 @@ public class RelationshipController {
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    @PutMapping("/friend-request/accept/{requesterId}")
+    public ResponseEntity<ApiResponse> acceptFriendRequest(@PathVariable final Long requesterId) {
+        Long currentUserId = currentUserService.getCurrentUserId();
+
+        relationshipService.acceptFriendRequest(currentUserId, requesterId);
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }
