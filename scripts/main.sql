@@ -131,8 +131,10 @@ GO
 /* CONSTRAINTS */
 
 ALTER TABLE [social].[User] WITH CHECK
-	ADD CONSTRAINT [CK_User_username_length] CHECK ((len([username])>(2) AND len([username])<(21)));
-GO
+	ADD CONSTRAINT [CK_User_username_length] CHECK ((len([username])>(2) AND len([username])<(21))); GO
+
+ALTER TABLE [social].[Relationship] WITH CHECK
+    ADD CONSTRAINT [CK_Relationship_user1Id_less_than_User2Id] CHECK ([user1Id] < [user2Id]); GO
 
 /* INDEXES */
 
@@ -167,6 +169,20 @@ BEGIN
     DECLARE @groupId INT = (SELECT groupId from inserted);
 
     UPDATE [social].[Group] SET lastActivity = @currentTime WHERE id = @groupId;
+END
+GO
+
+CREATE OR ALTER TRIGGER [tr_Relationship_InsertUpdate] ON [social].[Relationship]
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    DECLARE @currentTime DATETIME = GETDATE();
+    DECLARE @user1Id INT = (SELECT user1Id from inserted);
+    DECLARE @user2Id INT = (SELECT user2Id from inserted);
+
+    UPDATE [social].[Relationship]
+        SET lastUpdatedAt = @currentTime
+        WHERE user1Id = @user1Id AND user2Id = @user2Id;
 END
 GO
 
@@ -223,6 +239,97 @@ BEGIN
 END
 GO
 
+-- RELATIONSHIP
+
+CREATE PROCEDURE [social].[usp_GetAllRelationshipsOfUser] (@userId AS INT) AS
+BEGIN
+    SELECT * FROM [social].[Relationship] WHERE user1Id = @userId OR user2Id = @userId;
+END
+GO
+
+CREATE PROCEDURE [social].[usp_SendFriendRequest] (@requesterId AS INT, @targetId AS INT) AS
+BEGIN
+    DECLARE @user1 INT;
+    DECLARE @user2 INT;
+    DECLARE @statusId INT;
+
+    -- TODO check whether relationship exists
+
+    IF @requesterId < @targetId
+    BEGIN
+        SET @user1 = @requesterId;
+        SET @user2 = @targetId;
+        SET @statusId = (SELECT id FROM [enum].[RelationshipStatus] WHERE status = 'pending_first_second');
+    END
+    ELSE
+    BEGIN
+        SET @user1 = @targetId;
+        SET @user2 = @requesterId;
+        SET @statusId = (SELECT id FROM [enum].[RelationshipStatus] WHERE status = 'pending_second_first');
+    END
+
+    INSERT INTO [social].[Relationship] (user1Id, user2Id, statusId, lastUpdatedAt)
+    VALUES (@user1, @user2, @statusId, GETDATE());
+END
+GO
+
+CREATE PROCEDURE [social].[usp_AcceptFriendRequest] (@acceptorId AS INT, @requesterId AS INT) AS
+BEGIN
+    DECLARE @statusId INT = (SELECT id FROM [enum].[RelationshipStatus] WHERE status = 'friends');
+    DECLARE @prevStatusId INT;
+
+    IF @acceptorId < @requesterId
+    BEGIN
+        SET @prevStatusId = (SELECT id FROM [enum].[RelationshipStatus] WHERE status = 'pending_second_first');
+        UPDATE [social].[Relationship]
+            SET statusId = @statusId
+            WHERE user1Id = @acceptorId AND user2Id = @requesterId AND statusId = @prevStatusId;
+    END
+    ELSE
+    BEGIN
+        SET @prevStatusId = (SELECT id FROM [enum].[RelationshipStatus] WHERE status = 'pending_first_second');
+        UPDATE [social].[Relationship]
+            SET statusId = @statusId
+            WHERE user1Id = @requesterId AND user2Id = @acceptorId AND statusId = @prevStatusId;
+    END
+END
+GO
+
+CREATE PROCEDURE [social].[usp_RejectFriendRequest] (@rejectorId AS INT, @requesterId AS INT) AS
+BEGIN
+    DECLARE @prevStatusId INT;
+
+    IF @rejectorId < @requesterId
+        BEGIN
+            SET @prevStatusId = (SELECT id FROM [enum].[RelationshipStatus] WHERE status = 'pending_second_first');
+            DELETE FROM [social].[Relationship]
+            WHERE user1Id = @rejectorId AND user2Id = @requesterId AND statusId = @prevStatusId;
+        END
+    ELSE
+        BEGIN
+            SET @prevStatusId = (SELECT id FROM [enum].[RelationshipStatus] WHERE status = 'pending_first_second');
+            DELETE FROM [social].[Relationship]
+            WHERE user1Id = @requesterId AND user2Id = @rejectorId AND statusId = @prevStatusId;
+        END
+END
+GO
+
+ALTER PROCEDURE [social].[usp_RemoveFromFriends] (@removerId AS INT, @friendId AS INT) AS
+BEGIN
+    DECLARE @prevStatusId INT = (SELECT id FROM [enum].[RelationshipStatus] WHERE status = 'friends');
+
+    IF @removerId < @friendId
+        BEGIN
+            DELETE FROM [social].[Relationship]
+            WHERE user1Id = @removerId AND user2Id = @friendId AND statusId = @prevStatusId;
+        END
+    ELSE
+        BEGIN
+            DELETE FROM [social].[Relationship]
+            WHERE user1Id = @friendId AND user2Id = @removerId AND statusId = @prevStatusId;
+        END
+END
+GO
 
 /* PERMISSIONS */
 
@@ -243,6 +350,11 @@ GRANT EXECUTE ON OBJECT::[social].[usp_CreateGroup] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_AddMember] TO chatapp;
 GRANT EXECUTE ON OBJECT::[io].[usp_GetLastNGroupMessages] TO chatapp;
 GRANT EXECUTE ON OBJECT::[io].[usp_SendGroupMessage] TO chatapp;
+GRANT EXECUTE ON OBJECT::[social].[usp_GetAllRelationshipsOfUser] TO chatapp;
+GRANT EXECUTE ON OBJECT::[social].[usp_SendFriendRequest] TO chatapp;
+GRANT EXECUTE ON OBJECT::[social].[usp_AcceptFriendRequest] TO chatapp;
+GRANT EXECUTE ON OBJECT::[social].[usp_RejectFriendRequest] TO chatapp;
+GRANT EXECUTE ON OBJECT::[social].[usp_RemoveFromFriends] TO chatapp;
 GO
 
 
@@ -305,3 +417,17 @@ EXEC [io].[usp_SendGroupMessage] @authorId = 1, @groupId = 1, @content = N'Lorem
     Fusce vehicula quam efficitur fringilla ullamcorper.'; GO
 EXEC [io].[usp_SendGroupMessage] @authorId = 1, @groupId = 1, @content = N'I wonder how that lorem will render...'; GO
 EXEC [io].[usp_SendGroupMessage] @authorId = 2, @groupId = 1, @content = N'Hello!'; GO
+
+EXEC [social].[usp_SendFriendRequest] @requesterId = 1, @targetId = 2; GO
+EXEC [social].[usp_SendFriendRequest] @requesterId = 2, @targetId = 3; GO
+EXEC [social].[usp_SendFriendRequest] @requesterId = 3, @targetId = 1; GO
+
+EXEC [social].[usp_AcceptFriendRequest] @acceptorId = 1, @requesterId = 3; GO
+EXEC [social].[usp_AcceptFriendRequest] @acceptorId = 3, @requesterId = 2; GO
+EXEC [social].[usp_AcceptFriendRequest] @acceptorId = 2, @requesterId = 1; GO
+
+-- EXEC [social].[usp_RejectFriendRequest] @rejectorId = 1, @requesterId = 3; GO
+-- EXEC [social].[usp_RejectFriendRequest] @rejectorId = 2, @requesterId = 1; GO
+
+-- EXEC [social].[usp_RemoveFromFriends] @removerId = 1, @friendId = 3; GO
+-- EXEC [social].[usp_RemoveFromFriends] @removerId = 2, @friendId = 1; GO

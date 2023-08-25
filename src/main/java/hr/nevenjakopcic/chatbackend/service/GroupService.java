@@ -11,7 +11,7 @@ import hr.nevenjakopcic.chatbackend.mapper.GroupWithMembersDtoMapper;
 import hr.nevenjakopcic.chatbackend.model.Group;
 import hr.nevenjakopcic.chatbackend.repository.GroupMessageRepository;
 import hr.nevenjakopcic.chatbackend.repository.GroupRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class GroupService {
 
     private final GroupRepository groupRepository;

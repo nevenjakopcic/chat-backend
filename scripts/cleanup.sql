@@ -10,6 +10,11 @@ DROP PROCEDURE IF EXISTS [social].[usp_CreateGroup]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_AddMember]; GO
 DROP PROCEDURE IF EXISTS [io].[usp_GetLastNGroupMessages]; GO
 DROP PROCEDURE IF EXISTS [io].[usp_SendGroupMessage]; GO
+DROP PROCEDURE IF EXISTS [social].[usp_GetAllRelationshipsOfUser]; GO
+DROP PROCEDURE IF EXISTS [social].[usp_SendFriendRequest]; GO
+DROP PROCEDURE IF EXISTS [social].[usp_AcceptFriendRequest]; GO
+DROP PROCEDURE IF EXISTS [social].[usp_RejectFriendRequest]; GO
+DROP PROCEDURE IF EXISTS [social].[usp_RemoveFromFriends]; GO
 
 DROP TABLE IF EXISTS [io].[GroupMessageAttachment]; GO
 DROP TABLE IF EXISTS [io].[Notification]; GO

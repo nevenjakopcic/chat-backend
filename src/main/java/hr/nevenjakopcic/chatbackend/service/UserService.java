@@ -6,7 +6,7 @@ import hr.nevenjakopcic.chatbackend.exception.NotFoundException;
 import hr.nevenjakopcic.chatbackend.mapper.UserDtoMapper;
 import hr.nevenjakopcic.chatbackend.model.User;
 import hr.nevenjakopcic.chatbackend.repository.UserRepository;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
