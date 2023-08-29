@@ -213,6 +213,14 @@ BEGIN
 END
 GO
 
+CREATE OR ALTER PROCEDURE [social].[usp_PromoteMemberToAdmin] (@groupId AS INT, @userId AS INT) AS
+BEGIN
+    UPDATE [social].[Member]
+        SET roleId = 1
+        WHERE groupId = @groupId AND userId = @userId AND roleId = 2;
+END
+GO
+
 CREATE OR ALTER PROCEDURE [social].[usp_KickMemberFromGroup] (@groupId AS INT, @userId AS INT) AS
 BEGIN
     DELETE FROM [social].[Member]
@@ -373,6 +381,7 @@ GO
 GRANT EXECUTE ON OBJECT::[social].[usp_GetAllUsers] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_CreateUser] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_CreateGroup] TO chatapp;
+GRANT EXECUTE ON OBJECT::[social].[usp_PromoteMemberToAdmin] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_KickMemberFromGroup] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_AddMember] TO chatapp;
 GRANT EXECUTE ON OBJECT::[io].[usp_GetLastNGroupMessages] TO chatapp;

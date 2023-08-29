@@ -8,6 +8,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface GroupRepository extends JpaRepository<Group, Long> {
 
+    @Procedure(procedureName = "social.usp_PromoteMemberToAdmin")
+    void promoteMemberToAdmin(Long groupId, Long userId);
+
     @Procedure(procedureName = "social.usp_KickMemberFromGroup")
     void kickMemberFromGroup(Long groupId, Long userId);
 }

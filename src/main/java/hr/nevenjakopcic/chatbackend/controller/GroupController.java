@@ -35,6 +35,13 @@ public class GroupController {
         return new ResponseEntity<>(new ApiResponse(groupService.sendGroupMessage(id, request)), HttpStatus.CREATED);
     }
 
+    @PutMapping("/{id}/promote/{memberId}")
+    public ResponseEntity<ApiResponse> promoteMemberToAdmin(@PathVariable final Long id, @PathVariable final Long memberId) {
+        groupService.promoteMemberToAdmin(id, memberId);
+
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/{id}/kick/{memberId}")
     public ResponseEntity<ApiResponse> kickMemberFromGroup(@PathVariable final Long id, @PathVariable final Long memberId) {
         groupService.kickMemberFromGroup(id, memberId);

@@ -58,6 +58,11 @@ public class GroupService {
     }
 
     @Transactional
+    public void promoteMemberToAdmin(Long groupId, Long memberId) {
+        groupRepository.promoteMemberToAdmin(groupId, memberId);
+    }
+
+    @Transactional
     public void kickMemberFromGroup(Long groupId, Long memberId) {
         groupRepository.kickMemberFromGroup(groupId, memberId);
     }
