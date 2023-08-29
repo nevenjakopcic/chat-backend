@@ -35,6 +35,13 @@ public class GroupController {
         return new ResponseEntity<>(new ApiResponse(groupService.sendGroupMessage(id, request)), HttpStatus.CREATED);
     }
 
+    @DeleteMapping("/{id}/leave")
+    public ResponseEntity<ApiResponse> leaveGroup(@PathVariable final Long id) {
+        groupService.leaveGroup(id);
+
+        return ResponseEntity.ok().build();
+    }
+
     @PutMapping("/{id}/promote/{memberId}")
     public ResponseEntity<ApiResponse> promoteMemberToAdmin(@PathVariable final Long id, @PathVariable final Long memberId) {
         groupService.promoteMemberToAdmin(id, memberId);

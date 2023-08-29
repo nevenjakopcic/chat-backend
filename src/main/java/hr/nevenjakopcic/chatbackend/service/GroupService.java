@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class GroupService {
 
+    private final CurrentUserService currentUserService;
+
     private final GroupRepository groupRepository;
     private final GroupMessageRepository messageRepository;
 
@@ -55,6 +57,13 @@ public class GroupService {
                 message.getContent());
 
         return getLastNGroupMessages(groupId, 1L).get(0);
+    }
+
+    @Transactional
+    public void leaveGroup(Long groupId) {
+        Long memberId = currentUserService.getCurrentUserId();
+
+        groupRepository.kickMemberFromGroup(groupId, memberId);
     }
 
     @Transactional
