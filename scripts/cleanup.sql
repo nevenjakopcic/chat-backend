@@ -7,6 +7,7 @@ DROP LOGIN chatapp; GO
 DROP PROCEDURE IF EXISTS [social].[usp_GetAllUsers]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_CreateUser]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_CreateGroup]; GO
+DROP PROCEDURE IF EXISTS [social].[usp_KickMemberFromGroup]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_AddMember]; GO
 DROP PROCEDURE IF EXISTS [io].[usp_GetLastNGroupMessages]; GO
 DROP PROCEDURE IF EXISTS [io].[usp_SendGroupMessage]; GO

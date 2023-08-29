@@ -23,11 +23,11 @@ public class RelationshipController {
         return new ResponseEntity<>(new ApiResponse(relationshipService.getAllRelationshipsOfUser(currentUserId)), HttpStatus.OK);
     }
 
-    @PostMapping("/friend-request/{targetUserId}")
-    public ResponseEntity<ApiResponse> sendFriendRequest(@PathVariable final Long targetUserId) {
+    @PostMapping("/friend-request/{targetId}")
+    public ResponseEntity<ApiResponse> sendFriendRequest(@PathVariable final Long targetId) {
         Long currentUserId = currentUserService.getCurrentUserId();
 
-        relationshipService.sendFriendRequest(currentUserId, targetUserId);
+        relationshipService.sendFriendRequest(currentUserId, targetId);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

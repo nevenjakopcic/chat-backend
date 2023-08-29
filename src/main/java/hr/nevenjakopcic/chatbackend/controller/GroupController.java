@@ -34,4 +34,11 @@ public class GroupController {
     public ResponseEntity<ApiResponse> sendMessage(@PathVariable final Long id, @RequestBody IncomingMessage request) {
         return new ResponseEntity<>(new ApiResponse(groupService.sendGroupMessage(id, request)), HttpStatus.CREATED);
     }
+
+    @DeleteMapping("/{id}/kick/{memberId}")
+    public ResponseEntity<ApiResponse> kickMemberFromGroup(@PathVariable final Long id, @PathVariable final Long memberId) {
+        groupService.kickMemberFromGroup(id, memberId);
+
+        return ResponseEntity.ok().build();
+    }
 }

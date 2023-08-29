@@ -191,11 +191,11 @@ GO
 
 -- USER
 
-CREATE PROCEDURE [social].[usp_GetAllUsers] AS
+CREATE OR ALTER PROCEDURE [social].[usp_GetAllUsers] AS
 	SELECT id, username, email, lastOnline, joinedAt FROM [social].[User];
 GO
 
-CREATE PROCEDURE [social].[usp_CreateUser] (@username AS VARCHAR(20),
+CREATE OR ALTER PROCEDURE [social].[usp_CreateUser] (@username AS VARCHAR(20),
                                             @password AS VARCHAR(100),
                                             @email AS VARCHAR(50)) AS
 BEGIN
@@ -206,16 +206,23 @@ GO
 
 -- GROUP
 
-CREATE PROCEDURE [social].[usp_CreateGroup] (@name AS VARCHAR(20)) AS
+CREATE OR ALTER PROCEDURE [social].[usp_CreateGroup] (@name AS VARCHAR(20)) AS
 BEGIN
     INSERT INTO [social].[Group] (name, createdAt, lastActivity)
     VALUES (@name, GETDATE(), GETDATE());
 END
 GO
 
+CREATE OR ALTER PROCEDURE [social].[usp_KickMemberFromGroup] (@groupId AS INT, @userId AS INT) AS
+BEGIN
+    DELETE FROM [social].[Member]
+           WHERE groupId = @groupId AND userId = @userId;
+END
+GO
+
 -- GROUP MEMBER
 
-CREATE PROCEDURE [social].[usp_AddMember] (@groupId AS INT, @userId AS INT) AS
+CREATE OR ALTER PROCEDURE [social].[usp_AddMember] (@groupId AS INT, @userId AS INT) AS
 BEGIN
     DECLARE @userRoleId INT = (SELECT id FROM [enum].[MemberRole] WHERE role = 'ROLE_MEMBER')
 
@@ -226,13 +233,13 @@ GO
 
 -- GROUP MESSAGES
 
-CREATE PROCEDURE [io].[usp_GetLastNGroupMessages] (@groupId AS INT, @n AS INT) AS
+CREATE OR ALTER PROCEDURE [io].[usp_GetLastNGroupMessages] (@groupId AS INT, @n AS INT) AS
 BEGIN
     SELECT TOP(@n) id, authorId, groupId, content, createdAt FROM [io].[GroupMessage] WHERE groupId = @groupId ORDER BY id DESC;
 END
 GO
 
-CREATE PROCEDURE [io].[usp_SendGroupMessage] (@authorId AS INT, @groupId AS INT, @content AS VARCHAR(5000)) AS
+CREATE OR ALTER PROCEDURE [io].[usp_SendGroupMessage] (@authorId AS INT, @groupId AS INT, @content AS VARCHAR(5000)) AS
 BEGIN
     INSERT INTO [io].[GroupMessage] (authorId, groupId, content, createdAt)
     VALUES (@authorId, @groupId, @content, GETDATE());
@@ -241,13 +248,13 @@ GO
 
 -- RELATIONSHIP
 
-CREATE PROCEDURE [social].[usp_GetAllRelationshipsOfUser] (@userId AS INT) AS
+CREATE OR ALTER PROCEDURE [social].[usp_GetAllRelationshipsOfUser] (@userId AS INT) AS
 BEGIN
     SELECT * FROM [social].[Relationship] WHERE user1Id = @userId OR user2Id = @userId;
 END
 GO
 
-CREATE PROCEDURE [social].[usp_SendFriendRequest] (@requesterId AS INT, @targetId AS INT) AS
+CREATE OR ALTER PROCEDURE [social].[usp_SendFriendRequest] (@requesterId AS INT, @targetId AS INT) AS
 BEGIN
     DECLARE @user1 INT;
     DECLARE @user2 INT;
@@ -273,7 +280,7 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE [social].[usp_AcceptFriendRequest] (@acceptorId AS INT, @requesterId AS INT) AS
+CREATE OR ALTER PROCEDURE [social].[usp_AcceptFriendRequest] (@acceptorId AS INT, @requesterId AS INT) AS
 BEGIN
     DECLARE @statusId INT = (SELECT id FROM [enum].[RelationshipStatus] WHERE status = 'friends');
     DECLARE @prevStatusId INT;
@@ -295,7 +302,7 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE [social].[usp_RejectFriendRequest] (@rejectorId AS INT, @requesterId AS INT) AS
+CREATE OR ALTER PROCEDURE [social].[usp_RejectFriendRequest] (@rejectorId AS INT, @requesterId AS INT) AS
 BEGIN
     DECLARE @prevStatusId INT;
 
@@ -314,7 +321,7 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE [social].[usp_CancelFriendRequest] (@cancellerId AS INT, @targetId AS INT) AS
+CREATE OR ALTER PROCEDURE [social].[usp_CancelFriendRequest] (@cancellerId AS INT, @targetId AS INT) AS
 BEGIN
     DECLARE @prevStatusId INT;
 
@@ -333,7 +340,7 @@ BEGIN
 END
 GO
 
-ALTER PROCEDURE [social].[usp_RemoveFromFriends] (@removerId AS INT, @friendId AS INT) AS
+CREATE OR ALTER PROCEDURE [social].[usp_RemoveFromFriends] (@removerId AS INT, @friendId AS INT) AS
 BEGIN
     DECLARE @prevStatusId INT = (SELECT id FROM [enum].[RelationshipStatus] WHERE status = 'friends');
 
@@ -366,6 +373,7 @@ GO
 GRANT EXECUTE ON OBJECT::[social].[usp_GetAllUsers] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_CreateUser] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_CreateGroup] TO chatapp;
+GRANT EXECUTE ON OBJECT::[social].[usp_KickMemberFromGroup] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_AddMember] TO chatapp;
 GRANT EXECUTE ON OBJECT::[io].[usp_GetLastNGroupMessages] TO chatapp;
 GRANT EXECUTE ON OBJECT::[io].[usp_SendGroupMessage] TO chatapp;

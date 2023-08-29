@@ -56,4 +56,9 @@ public class GroupService {
 
         return getLastNGroupMessages(groupId, 1L).get(0);
     }
+
+    @Transactional
+    public void kickMemberFromGroup(Long groupId, Long memberId) {
+        groupRepository.kickMemberFromGroup(groupId, memberId);
+    }
 }
