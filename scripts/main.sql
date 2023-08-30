@@ -131,7 +131,7 @@ GO
 /* CONSTRAINTS */
 
 ALTER TABLE [social].[User] WITH CHECK
-	ADD CONSTRAINT [CK_User_username_length] CHECK ((len([username])>(2) AND len([username])<(21))); GO
+	ADD CONSTRAINT [CK_User_username_length] CHECK ((len([username])>=(3) AND len([username])<=(20))); GO
 
 ALTER TABLE [social].[Group] WITH CHECK
     ADD CONSTRAINT [CK_Group_name_length] CHECK ((len([name])>=(3) AND len([name])<=(20))); GO
@@ -254,7 +254,19 @@ GO
 
 CREATE OR ALTER PROCEDURE [io].[usp_GetLastNGroupMessages] (@groupId AS INT, @n AS INT) AS
 BEGIN
-    SELECT TOP(@n) id, authorId, groupId, content, createdAt FROM [io].[GroupMessage] WHERE groupId = @groupId ORDER BY id DESC;
+    SELECT TOP(@n) id, authorId, groupId, content, createdAt
+        FROM [io].[GroupMessage]
+        WHERE groupId = @groupId
+        ORDER BY id DESC;
+END
+GO
+
+CREATE OR ALTER PROCEDURE [io].[usp_GetLastNGroupMessagesAfterSpecific] (@groupId AS INT, @n AS INT, @lastMessageId AS INT) AS
+BEGIN
+    SELECT TOP(@n) id, authorId, groupId, content, createdAt
+        FROM [io].[GroupMessage]
+        WHERE groupId = @groupId AND id < @lastMessageId
+        ORDER BY id DESC;
 END
 GO
 
@@ -397,6 +409,7 @@ GRANT EXECUTE ON OBJECT::[social].[usp_KickMemberFromGroup] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_AddMember] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_AddAdmin] TO chatapp;
 GRANT EXECUTE ON OBJECT::[io].[usp_GetLastNGroupMessages] TO chatapp;
+GRANT EXECUTE ON OBJECT::[io].[usp_GetLastNGroupMessagesAfterSpecific] TO chatapp;
 GRANT EXECUTE ON OBJECT::[io].[usp_SendGroupMessage] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_GetAllRelationshipsOfUser] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_SendFriendRequest] TO chatapp;

@@ -31,9 +31,23 @@ public class GroupController {
         return new ResponseEntity<>(new ApiResponse(groupService.createGroup(request)), HttpStatus.CREATED);
     }
 
+    @PostMapping("/{id}/add-member/{userId}")
+    public ResponseEntity<ApiResponse> addMemberToGroup(@PathVariable final Long id, @PathVariable final Long userId) {
+        groupService.AddMember(id, userId);
+
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/{id}/last/{n}")
     public ResponseEntity<ApiResponse> getLastNGroupMessages(@PathVariable final Long id, @PathVariable final Long n) {
         return new ResponseEntity<>(new ApiResponse(groupService.getLastNGroupMessages(id, n)), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/last/{n}/after/{lastMessageId}")
+    public ResponseEntity<ApiResponse> getLastNGroupMessagesAfterSpecific(@PathVariable final Long id,
+                                                             @PathVariable final Long n,
+                                                             @PathVariable final Long lastMessageId) {
+        return new ResponseEntity<>(new ApiResponse(groupService.getLastNGroupMessagesAfterSpecific(id, n, lastMessageId)), HttpStatus.OK);
     }
 
     @PostMapping("/{id}")

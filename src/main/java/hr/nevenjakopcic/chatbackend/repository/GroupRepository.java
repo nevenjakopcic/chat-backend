@@ -17,6 +17,9 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     @Procedure(procedureName = "social.usp_CreateGroup")
     Group createGroup(String name);
 
+    @Procedure(procedureName = "social.usp_AddMember")
+    void addMember(Long groupId, Long userId);
+
     @Procedure(procedureName = "social.usp_AddAdmin")
     void addAdmin(Long groupId, Long userId);
 }

@@ -53,9 +53,21 @@ public class GroupService {
         return GroupDtoMapper.map(group);
     }
 
+    @Transactional
+    public void AddMember(Long groupId, Long userId) {
+        groupRepository.addMember(groupId, userId);
+    }
+
     @Transactional(readOnly = true)
     public List<GroupMessageDto> getLastNGroupMessages(Long groupId, Long n) {
         return messageRepository.getLastNGroupMessages(groupId, n).stream()
+                .map(GroupMessageDtoMapper::map)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<GroupMessageDto> getLastNGroupMessagesAfterSpecific(Long groupId, Long n, Long lastMessageId) {
+        return messageRepository.getLastNGroupMessagesAfterSpecific(groupId, n, lastMessageId).stream()
                 .map(GroupMessageDtoMapper::map)
                 .collect(Collectors.toList());
     }
