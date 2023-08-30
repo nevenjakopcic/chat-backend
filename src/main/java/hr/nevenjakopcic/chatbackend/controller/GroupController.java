@@ -1,6 +1,7 @@
 package hr.nevenjakopcic.chatbackend.controller;
 
 import hr.nevenjakopcic.chatbackend.dto.ApiResponse;
+import hr.nevenjakopcic.chatbackend.dto.request.CreateGroupRequest;
 import hr.nevenjakopcic.chatbackend.dto.websocket.IncomingMessage;
 import hr.nevenjakopcic.chatbackend.service.GroupService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,11 @@ public class GroupController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse> getGroupInfoAndMembers(@PathVariable Long id) {
         return new ResponseEntity<>(new ApiResponse(groupService.getGroupAndMembers(id)), HttpStatus.OK);
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<ApiResponse> createGroup(@RequestBody CreateGroupRequest request) {
+        return new ResponseEntity<>(new ApiResponse(groupService.createGroup(request)), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}/last/{n}")

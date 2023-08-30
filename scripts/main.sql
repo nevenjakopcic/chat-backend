@@ -133,6 +133,9 @@ GO
 ALTER TABLE [social].[User] WITH CHECK
 	ADD CONSTRAINT [CK_User_username_length] CHECK ((len([username])>(2) AND len([username])<(21))); GO
 
+ALTER TABLE [social].[Group] WITH CHECK
+    ADD CONSTRAINT [CK_Group_name_length] CHECK ((len([name])>=(3) AND len([name])<=(20))); GO
+
 ALTER TABLE [social].[Relationship] WITH CHECK
     ADD CONSTRAINT [CK_Relationship_user1Id_less_than_User2Id] CHECK ([user1Id] < [user2Id]); GO
 
@@ -209,7 +212,8 @@ GO
 CREATE OR ALTER PROCEDURE [social].[usp_CreateGroup] (@name AS VARCHAR(20)) AS
 BEGIN
     INSERT INTO [social].[Group] (name, createdAt, lastActivity)
-    VALUES (@name, GETDATE(), GETDATE());
+        OUTPUT inserted.id, inserted.name, inserted.createdAt, inserted.lastActivity
+        VALUES (@name, GETDATE(), GETDATE());
 END
 GO
 
@@ -228,11 +232,18 @@ BEGIN
 END
 GO
 
--- GROUP MEMBER
-
 CREATE OR ALTER PROCEDURE [social].[usp_AddMember] (@groupId AS INT, @userId AS INT) AS
 BEGIN
     DECLARE @userRoleId INT = (SELECT id FROM [enum].[MemberRole] WHERE role = 'ROLE_MEMBER')
+
+    INSERT INTO [social].[Member] (groupId, userId, roleId, joinedAt)
+    VALUES (@groupId, @userId, @userRoleId, GETDATE());
+END
+GO
+
+CREATE OR ALTER PROCEDURE [social].[usp_AddAdmin] (@groupId AS INT, @userId AS INT) AS
+BEGIN
+    DECLARE @userRoleId INT = (SELECT id FROM [enum].[MemberRole] WHERE role = 'ROLE_ADMIN')
 
     INSERT INTO [social].[Member] (groupId, userId, roleId, joinedAt)
     VALUES (@groupId, @userId, @userRoleId, GETDATE());
@@ -384,6 +395,7 @@ GRANT EXECUTE ON OBJECT::[social].[usp_CreateGroup] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_PromoteMemberToAdmin] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_KickMemberFromGroup] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_AddMember] TO chatapp;
+GRANT EXECUTE ON OBJECT::[social].[usp_AddAdmin] TO chatapp;
 GRANT EXECUTE ON OBJECT::[io].[usp_GetLastNGroupMessages] TO chatapp;
 GRANT EXECUTE ON OBJECT::[io].[usp_SendGroupMessage] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_GetAllRelationshipsOfUser] TO chatapp;

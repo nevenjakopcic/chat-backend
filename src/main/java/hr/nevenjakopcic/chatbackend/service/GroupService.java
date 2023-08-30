@@ -1,5 +1,6 @@
 package hr.nevenjakopcic.chatbackend.service;
 
+import hr.nevenjakopcic.chatbackend.dto.request.CreateGroupRequest;
 import hr.nevenjakopcic.chatbackend.dto.response.GroupDto;
 import hr.nevenjakopcic.chatbackend.dto.response.GroupMessageDto;
 import hr.nevenjakopcic.chatbackend.dto.response.GroupWithMembersDto;
@@ -40,6 +41,16 @@ public class GroupService {
                 .orElseThrow(() -> new NotFoundException(String.format("Group with id %d not found.", groupId)));
 
         return GroupWithMembersDtoMapper.map(group);
+    }
+
+    @Transactional
+    public GroupDto createGroup(CreateGroupRequest request) {
+        Group group = groupRepository.createGroup(request.getName());
+
+        Long currentUserId = currentUserService.getCurrentUserId();
+        groupRepository.addAdmin(group.getId(), currentUserId);
+
+        return GroupDtoMapper.map(group);
     }
 
     @Transactional(readOnly = true)
