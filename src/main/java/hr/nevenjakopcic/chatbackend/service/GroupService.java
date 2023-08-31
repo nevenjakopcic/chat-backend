@@ -30,7 +30,9 @@ public class GroupService {
 
     @Transactional(readOnly = true)
     public List<GroupDto> getAllGroups() {
-        return groupRepository.findAll().stream()
+        Long currentUserId = currentUserService.getCurrentUserId();
+
+        return groupRepository.getGroupsWithMember(currentUserId).stream()
                 .map(GroupDtoMapper::map)
                 .collect(Collectors.toList());
     }

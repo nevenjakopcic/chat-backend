@@ -205,6 +205,14 @@ GO
 
 -- GROUP
 
+CREATE OR ALTER PROCEDURE [social].[usp_GetGroupsWithMember] (@userId AS INT) AS
+BEGIN
+    SELECT [Group].* FROM [social].[Group]
+        JOIN [social].[Member] ON [Group].id = [Member].groupId
+        WHERE userId = @userId;
+END
+GO
+
 CREATE OR ALTER PROCEDURE [social].[usp_CreateGroup] (@name AS VARCHAR(20)) AS
 BEGIN
     INSERT INTO [social].[Group] (name, createdAt, lastActivity)
@@ -269,6 +277,39 @@ GO
 CREATE OR ALTER PROCEDURE [io].[usp_SendGroupMessage] (@authorId AS INT, @groupId AS INT, @content AS VARCHAR(5000)) AS
 BEGIN
     INSERT INTO [io].[GroupMessage] (authorId, groupId, content, createdAt)
+    VALUES (@authorId, @groupId, @content, GETDATE());
+END
+GO
+
+-- PRIVATE MESSAGES
+
+CREATE OR ALTER PROCEDURE [io].[usp_GetLastNPrivateMessages] (@firstUserId AS INT, @secondUserId AS INT, @n AS INT) AS
+BEGIN
+    SELECT TOP(@n) id, authorId, recipientId, content, createdAt
+        FROM [io].[PrivateMessage]
+        WHERE (authorId = @firstUserId AND recipientId = @secondUserId)
+                OR (authorId = @secondUserId AND recipientId = @firstUserId)
+        ORDER BY id DESC;
+END
+GO
+
+CREATE OR ALTER PROCEDURE [io].[usp_GetLastNPrivateMessagesAfterSpecific] (@firstUserId AS INT,
+                                                                           @secondUserId AS INT,
+                                                                           @n AS INT,
+                                                                           @lastMessageId AS INT) AS
+BEGIN
+    SELECT TOP(@n) id, authorId, recipientId, content, createdAt
+        FROM [io].[PrivateMessage]
+        WHERE ((authorId = @firstUserId AND recipientId = @secondUserId)
+                OR (authorId = @secondUserId AND recipientId = @firstUserId))
+                AND id < @lastMessageId
+        ORDER BY id DESC;
+END
+GO
+
+CREATE OR ALTER PROCEDURE [io].[usp_SendPrivateMessage] (@authorId AS INT, @groupId AS INT, @content AS VARCHAR(5000)) AS
+BEGIN
+    INSERT INTO [io].[PrivateMessage] (authorId, recipientId, content, createdAt)
     VALUES (@authorId, @groupId, @content, GETDATE());
 END
 GO
@@ -397,6 +438,7 @@ DENY DELETE ON [io].[GroupMessage] TO chatapp;
 GO
 
 -- EXECUTE STORED PROCEDURES PERMISSIONS
+GRANT EXECUTE ON OBJECT::[social].[usp_GetGroupsWithMember] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_CreateUser] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_CreateGroup] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_PromoteMemberToAdmin] TO chatapp;
@@ -406,6 +448,9 @@ GRANT EXECUTE ON OBJECT::[social].[usp_AddAdmin] TO chatapp;
 GRANT EXECUTE ON OBJECT::[io].[usp_GetLastNGroupMessages] TO chatapp;
 GRANT EXECUTE ON OBJECT::[io].[usp_GetLastNGroupMessagesAfterSpecific] TO chatapp;
 GRANT EXECUTE ON OBJECT::[io].[usp_SendGroupMessage] TO chatapp;
+GRANT EXECUTE ON OBJECT::[io].[usp_GetLastNPrivateMessages] TO chatapp;
+GRANT EXECUTE ON OBJECT::[io].[usp_GetLastNPrivateMessagesAfterSpecific] TO chatapp;
+GRANT EXECUTE ON OBJECT::[io].[usp_SendPrivateMessage] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_GetAllRelationshipsOfUser] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_SendFriendRequest] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_AcceptFriendRequest] TO chatapp;

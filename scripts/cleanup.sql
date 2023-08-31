@@ -4,6 +4,7 @@ USE chatdb;
 DROP USER chatapp; GO
 DROP LOGIN chatapp; GO
 
+DROP PROCEDURE IF EXISTS [social].[usp_GetGroupsWithMember]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_CreateUser]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_CreateGroup]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_PromoteMemberToAdmin]; GO
@@ -11,7 +12,11 @@ DROP PROCEDURE IF EXISTS [social].[usp_KickMemberFromGroup]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_AddMember]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_AddAdmin]; GO
 DROP PROCEDURE IF EXISTS [io].[usp_GetLastNGroupMessages]; GO
+DROP PROCEDURE IF EXISTS [io].[usp_GetLastNGroupMessagesAfterSpecific]; GO
 DROP PROCEDURE IF EXISTS [io].[usp_SendGroupMessage]; GO
+DROP PROCEDURE IF EXISTS [io].[usp_GetLastNPrivateMessages]; GO
+DROP PROCEDURE IF EXISTS [io].[usp_GetLastNPrivateMessagesAfterSpecific]; GO
+DROP PROCEDURE IF EXISTS [io].[usp_SendPrivateMessage]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_GetAllRelationshipsOfUser]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_SendFriendRequest]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_AcceptFriendRequest]; GO

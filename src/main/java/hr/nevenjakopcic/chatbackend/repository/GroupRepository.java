@@ -5,8 +5,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface GroupRepository extends JpaRepository<Group, Long> {
+
+    @Procedure(procedureName = "social.usp_GetGroupsWithMember")
+    List<Group> getGroupsWithMember(Long userId);
 
     @Procedure(procedureName = "social.usp_PromoteMemberToAdmin")
     void promoteMemberToAdmin(Long groupId, Long userId);
