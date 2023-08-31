@@ -4,7 +4,6 @@ USE chatdb;
 DROP USER chatapp; GO
 DROP LOGIN chatapp; GO
 
-DROP PROCEDURE IF EXISTS [social].[usp_GetAllUsers]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_CreateUser]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_CreateGroup]; GO
 DROP PROCEDURE IF EXISTS [social].[usp_PromoteMemberToAdmin]; GO

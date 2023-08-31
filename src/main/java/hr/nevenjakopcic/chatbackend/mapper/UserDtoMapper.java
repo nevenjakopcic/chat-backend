@@ -11,7 +11,7 @@ public class UserDtoMapper {
             .username(source.getUsername())
             .email(source.getEmail())
             .lastOnline(source.getLastOnline())
-            .joinedAt(source.getJoinedAt())
+            .userSince(source.getJoinedAt())
             .build();
     }
 

@@ -23,7 +23,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public List<UserDto> getAll() {
-        return userRepository.getAll().stream()
+        return userRepository.findAll().stream()
                                       .map(UserDtoMapper::map)
                                       .collect(Collectors.toList());
     }

@@ -194,10 +194,6 @@ GO
 
 -- USER
 
-CREATE OR ALTER PROCEDURE [social].[usp_GetAllUsers] AS
-	SELECT id, username, email, lastOnline, joinedAt FROM [social].[User];
-GO
-
 CREATE OR ALTER PROCEDURE [social].[usp_CreateUser] (@username AS VARCHAR(20),
                                             @password AS VARCHAR(100),
                                             @email AS VARCHAR(50)) AS
@@ -401,7 +397,6 @@ DENY DELETE ON [io].[GroupMessage] TO chatapp;
 GO
 
 -- EXECUTE STORED PROCEDURES PERMISSIONS
-GRANT EXECUTE ON OBJECT::[social].[usp_GetAllUsers] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_CreateUser] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_CreateGroup] TO chatapp;
 GRANT EXECUTE ON OBJECT::[social].[usp_PromoteMemberToAdmin] TO chatapp;

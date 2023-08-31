@@ -22,5 +22,5 @@ public class UserDto implements Serializable {
     private String username;
     private String email;
     private LocalDateTime lastOnline;
-    private LocalDateTime joinedAt;
+    private LocalDateTime userSince;
 }
